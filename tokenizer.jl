@@ -1,5 +1,8 @@
 # the string manipulation file
 
+
+# STEP 1: DEFINE A TOKEN
+
 struct Token
     name::Symbol
     value::Float64
@@ -8,7 +11,7 @@ end
 # Makes tokens to print nicely in the termnal
 Base.show(io::IO, t::Token) = print(io, "$(t.name) = $(t.value)")
 
-
+    
 function tokenize(input::String)::Vector{Token}
     tokens = Token[]    # strat with empty list of tokens
 

@@ -1,13 +1,15 @@
 # Contains ALL thermodynamic solvers and does the actual math
 #= Solvers in this file:
     1. FirstLawSolver
-    2. IdealGasLaw
+    2. Ideal Gas Law: PV = nRT
+    3. Heat Capacity: Q = mcΔT
 =#
 
 
 include("abstract_solver.jl")
 
-# 1: First law of thermodynamics : ∆U = Q - W
+# Solver 1: First law of thermodynamics : ∆U = Q - W
+
 
 struct FirstLawSolver <: PhysicsSolver end
 
@@ -56,4 +58,103 @@ function solve(::FirstLawSolver, values::Dict{Symbol, Float64})
     return values
 end
 
+# rule 3: which domain does this belong to? (used for display purposes)
 get_domain(::FirstLawSolver) = :thermo
+
+
+# =============================================================================
+# SOLVER 2: IDEAL GAS LAW: PV = nRT
+# =============================================================================
+
+struct IdealGasSolver <: PhysicsSolver end
+
+function can_solve(::IdealGasSolver, variables::Set{Symbol})::Bool
+    our_variables = Set([
+        :p, :pressure, :P,
+        :V, :v, :volume,
+        :n, :moles,
+        :T, :temp, :temperature
+    ])
+
+    matches = length(intersect(variables, our_variables))
+
+    return matches >= 3 # we need at least 3 of the 4 variables to solve for the unknown
+end
+
+function solve(::IdealGasSolver, values::Dict{Symbol, Float64})
+    P = get(values, :P, get(values, :p, get(values, :pressure, nothing)))
+    V = get(values, :V, get(values, :v, get(values, :volume, nothing)))
+    n = get(values, :n, get(values, :moles, nothing))
+    T = get(values, :T, get(values, :temp, get(values, :temperature, nothing)))
+
+    R = 8.3145 # universal gas constant in J/(mol·K)
+    # PV = nRT - solve for the unknown
+
+    if isnothing(P)
+        P = (n*R*T) / V
+        values[:P] = P
+    elseif isnothing(V)
+        V = ((n*R*T) / P)
+        values[:P] = P
+    elseif isnothing(n)
+        n = (P*V) / (R * T)
+        values[:n] = n
+    elseif isnothing(T)
+        T = (P*V) / (R * n)
+        values[:T] = T
+    end
+
+    return values
+end
+
+get_domain(::IdealGasSolver) = :thermo
+
+
+# =============================================================================
+# Solver 3: Heat Capcity: Q = mcΔT
+# =============================================================================
+
+struct HeatCapacitySolver <: PhysicsSolver end
+
+
+function can_solve(::HeatCapacitySolver, variables::Set{Symbol})::Bool
+    our_variables = Set([
+        :Q, :q, :heat,
+        :m, :M, :mass,
+        :T, :temp, :temperature, :deltaT, :dt, :ΔT,
+        :c, :C, :specificheat, :specific_heat
+    ])
+
+    matches = length(intersect(variables, our_variables))
+
+    return matches >= 3
+end
+
+
+function solve(::HeatCapacitySolver, values::Dict{Symbol, Float64})
+    Q = get(values, :Q, get(values, :q, get(values, :heat, nothing)))
+    m = get(values, :m, get(values, :M, get(values, :mass, nothing)))
+    c = get(values, :c, get(values, :C, get(values, :specificheat, get(values, :specific_heat, nothing))))
+    ΔT = get(values, :deltaT, get(values, :temp, get(values, :temperature, get(values, :dt, get(values, :ΔT, nothing)))))
+
+    # Q = mcΔT - solve for the unknown
+
+    if isnothing(Q)
+        Q = m * c * ΔT
+        values[:Q] = Q
+    elseif isnothing(m)
+        m = Q / (c * ΔT)
+        values[:m] = m
+    elseif isnothing(c)
+        c = Q / (m * ΔT)
+        values[:c] = c
+    elseif isnothing(ΔT)
+        ΔT = Q / (m * c)
+        values[:ΔT] = ΔT
+    end
+            
+    return values
+end
+
+get_domain(::HeatCapacitySolver) = :thermo
+

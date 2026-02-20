@@ -120,8 +120,8 @@ end
 
 function run()
     println("╔══════════════════════════════════════════════════════════════╗")
-    println("║             PHYSICS PROBLEM SOLVER  v1.0                   ║")
-    println("║          Plugin Architecture  |  Julia Language            ║")
+    println("║             PHYSICS PROBLEM SOLVER  v1.0                     ║")
+    println("║          Plugin Architecture  |  Julia Language              ║")
     println("╚══════════════════════════════════════════════════════════════╝")
     println()
     println("Type 'help' for examples or 'quit' to exit.")

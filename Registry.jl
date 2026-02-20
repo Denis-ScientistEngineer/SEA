@@ -34,7 +34,7 @@ function clear_registry()
 end
 
 
-#   GER ALL SOLVERS: Returns the full list(used by dispatcher)
+#   GET ALL SOLVERS: Returns the full list(used by dispatcher)
 
 function get_all_solvers()::Vector{PhysicsSolver}
     return SOLVER_REGISTRY
