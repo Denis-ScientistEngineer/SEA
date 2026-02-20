@@ -7,11 +7,11 @@ WORKDIR /app
 # Copy all your files into the app
 COPY . .
 
-# Install your Julia dependencies
-RUN julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate()'
+# Install HTTP and JSON packages (your app needs these)
+RUN julia -e 'using Pkg; Pkg.add(["HTTP", "JSON"])'
 
 # Tell Railway what port your app uses
 EXPOSE 8080
 
 # Command to start your server
-CMD ["julia", "--project=.", "gui_server.jl"]
+CMD ["julia", "gui_server.jl"]
