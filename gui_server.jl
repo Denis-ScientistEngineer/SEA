@@ -18,8 +18,8 @@ using Printf
 
 # Load your existing physics solver (EXACT same files you already have!)
 include("abstract_solver.jl")
-include("thermo.jl")
-include("Registry.jl")
+include("thermodynamics.jl")
+include("registry.jl")
 include("tokenizer.jl")
 include("dispatcher.jl")
 
@@ -171,29 +171,26 @@ end
 # =============================================================================
 
 function start_server()
-    # IMPORTANT FIX FOR RAILWAY:
-    # Get port from environment variable (Railway sets this automatically)
-    # Railway uses PORT environment variable, default to 8080 if not set
-    port = parse(Int, get(ENV, "PORT", "8080"))
+    # Get port from environment variable (Railway sets this) or use 8000 locally
+    port = parse(Int, get(ENV, "PORT", "8000"))
     
-    # IMPORTANT FIX FOR RAILWAY:
-    # In production (Railway), we MUST listen on 0.0.0.0
-    # This allows connections from outside the container
-    # For local development, we can use 127.0.0.1
-    host = "0.0.0.0"  # ALWAYS use 0.0.0.0 for Railway!
+    # Determine if we're running locally or in production
+    is_production = haskey(ENV, "RAILWAY_ENVIRONMENT") || haskey(ENV, "PORT")
+    
+    # In production, listen on 0.0.0.0 (accessible from internet)
+    # Locally, listen on 127.0.0.1 (only accessible from your computer)
+    host = is_production ? "0.0.0.0" : "127.0.0.1"
     
     println("\n" * "="^60)
     println("🌐 Physics Solver Web Server Starting...")
     println("="^60)
     
-    # Check if we're on Railway (they set RAILWAY_ENVIRONMENT or PORT)
-    if haskey(ENV, "RAILWAY_ENVIRONMENT") || haskey(ENV, "RAILWAY_SERVICE_NAME")
-        println("\n🚀 RAILWAY PRODUCTION MODE")
+    if is_production
+        println("\n🚀 Production Mode")
         println("📍 Server running on port: $port")
-        println("📍 Listening on: $host")
-        println("🌍 Accessible from: https://your-app.railway.app")
+        println("🌍 Accessible from anywhere!")
     else
-        println("\n🏠 Local Development Mode")
+        println("\n🏠 Local Mode")
         println("📍 Server running at: http://localhost:$port")
         println("\n🔍 Open your web browser and go to:")
         println("   http://localhost:$port")
@@ -203,7 +200,6 @@ function start_server()
     println("="^60 * "\n")
     
     # Start the HTTP server
-    # The server will be accessible from anywhere when on Railway
     HTTP.serve(handle_request, host, port)
 end
 
