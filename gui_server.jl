@@ -18,8 +18,8 @@ using Printf
 
 # Load your existing physics solver (EXACT same files you already have!)
 include("abstract_solver.jl")
-include("thermodynamics.jl")
-include("registry.jl")
+include("thermo.jl")
+include("Registry.jl")
 include("tokenizer.jl")
 include("dispatcher.jl")
 
