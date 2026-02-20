@@ -26,7 +26,7 @@ using Printf
 # Load your existing physics solver (EXACT same files you already have!)
 include("abstract_solver.jl")
 include("thermo.jl")
-include("registry.jl")
+include("Registry.jl")
 include("tokenizer.jl")
 include("dispatcher.jl")
 
