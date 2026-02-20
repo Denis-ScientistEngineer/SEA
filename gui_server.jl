@@ -1,22 +1,15 @@
 # =============================================================================
-# gui_server.jl - Web Server for Physics Solver GUI
+# gui_server.jl - Web Server for Physics Solver GUI (PRODUCTION READY!)
 # =============================================================================
-# PURPOSE: Creates a simple web server so you can use your solver in a browser!
+# PURPOSE: Creates a web server that works both locally AND in the cloud!
 #
-# HOW TO RUN:
-#   1. Install HTTP package (only need to do this ONCE):
-#      julia> using Pkg; Pkg.add("HTTP"); Pkg.add("JSON")
+# HOW TO RUN LOCALLY:
+#   julia gui_server.jl
+#   Then open: http://localhost:8000
 #
-#   2. Run this file:
-#      julia gui_server.jl
-#
-#   3. Open your browser to:
-#      http://localhost:8000
-#
-# WHAT THIS DOES:
-#   - Creates a web server on your computer
-#   - Uses your EXISTING solver code (no changes needed!)
-#   - Provides an API endpoint for the GUI to call
+# HOW TO DEPLOY TO CLOUD:
+#   Follow DEPLOYMENT_GUIDE.md
+#   Then access from anywhere: https://your-app.railway.app
 # =============================================================================
 
 using HTTP
@@ -32,7 +25,6 @@ include("dispatcher.jl")
 
 # Initialize solvers (same as in main.jl)
 println("🚀 Initializing Physics Solver...")
-const SOLVER_REGISTRY = Vector{PhysicsSolver}()
 
 function initialize_solvers()
     register_solver(FirstLawSolver())
@@ -108,19 +100,32 @@ function handle_request(req::HTTP.Request)
     # Get the path the browser requested
     path = HTTP.URIs.URI(req.target).path
     
+    # CORS headers for production (allows access from anywhere)
+    cors_headers = [
+        "Access-Control-Allow-Origin" => "*",
+        "Access-Control-Allow-Methods" => "POST, GET, OPTIONS",
+        "Access-Control-Allow-Headers" => "Content-Type"
+    ]
+    
+    # Handle preflight requests
+    if req.method == "OPTIONS"
+        return HTTP.Response(200, cors_headers, "")
+    end
+    
     if path == "/"
         # Serve the HTML page
         html_file = "index.html"
         if isfile(html_file)
-            return HTTP.Response(200, read(html_file, String))
+            html_content = read(html_file, String)
+            return HTTP.Response(200, 
+                ["Content-Type" => "text/html; charset=utf-8"], 
+                html_content)
         else
             return HTTP.Response(404, "index.html not found! Make sure it's in the same folder as gui_server.jl")
         end
         
     elseif path == "/solve"
         # API endpoint - solve a problem
-        # The browser sends: POST /solve with body: {"input": "Q=100, W=40"}
-        
         body = String(req.body)
         data = JSON.parse(body)
         input = data["input"]
@@ -128,11 +133,10 @@ function handle_request(req::HTTP.Request)
         println("📝 Solving: $input")
         result = solve_api(input)
         
-        # Return JSON response
+        # Return JSON response with CORS headers
         response_json = JSON.json(result)
         return HTTP.Response(200, 
-            ["Content-Type" => "application/json",
-             "Access-Control-Allow-Origin" => "*"],
+            vcat(cors_headers, ["Content-Type" => "application/json"]),
             response_json)
     
     elseif path == "/solvers"
@@ -147,8 +151,14 @@ function handle_request(req::HTTP.Request)
         
         response_json = JSON.json(Dict("solvers" => solvers))
         return HTTP.Response(200,
-            ["Content-Type" => "application/json"],
+            vcat(cors_headers, ["Content-Type" => "application/json"]),
             response_json)
+    
+    elseif path == "/health"
+        # Health check endpoint (for Railway)
+        return HTTP.Response(200, 
+            ["Content-Type" => "application/json"],
+            JSON.json(Dict("status" => "healthy", "solvers" => length(get_all_solvers()))))
         
     else
         return HTTP.Response(404, "Not found")
@@ -160,21 +170,40 @@ end
 # START THE SERVER!
 # =============================================================================
 
-function start_server(port=8000)
+function start_server()
+    # Get port from environment variable (Railway sets this) or use 8000 locally
+    port = parse(Int, get(ENV, "PORT", "8000"))
+    
+    # Determine if we're running locally or in production
+    is_production = haskey(ENV, "RAILWAY_ENVIRONMENT") || haskey(ENV, "PORT")
+    
+    # In production, listen on 0.0.0.0 (accessible from internet)
+    # Locally, listen on 127.0.0.1 (only accessible from your computer)
+    host = is_production ? "0.0.0.0" : "127.0.0.1"
+    
     println("\n" * "="^60)
     println("🌐 Physics Solver Web Server Starting...")
     println("="^60)
-    println("\n📍 Server running at: http://localhost:$port")
-    println("\n🔍 Open your web browser and go to:")
-    println("   http://localhost:$port")
+    
+    if is_production
+        println("\n🚀 Production Mode")
+        println("📍 Server running on port: $port")
+        println("🌍 Accessible from anywhere!")
+    else
+        println("\n🏠 Local Mode")
+        println("📍 Server running at: http://localhost:$port")
+        println("\n🔍 Open your web browser and go to:")
+        println("   http://localhost:$port")
+    end
+    
     println("\n⏹️  Press Ctrl+C to stop the server")
-    println("\n" * "="^60 * "\n")
+    println("="^60 * "\n")
     
     # Start the HTTP server
-    HTTP.serve(handle_request, "127.0.0.1", port)
+    HTTP.serve(handle_request, host, port)
 end
 
 # Run the server when this file is executed
 if abspath(PROGRAM_FILE) == @__FILE__
-    start_server(8000)
+    start_server()
 end

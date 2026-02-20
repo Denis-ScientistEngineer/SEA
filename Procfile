@@ -1,0 +1,1 @@
+web: julia --project=. gui_server.jl

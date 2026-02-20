@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Physics Problem Solver</title>
     <style>
-        /* ============================================ */
-        /* STYLING - Makes everything look pretty      */
-        /* You don't need to understand this!          */
-        /* ============================================ */
-        
+        /* Same beautiful styling as before */
         * {
             margin: 0;
             padding: 0;
@@ -47,6 +43,16 @@
             color: #666;
             margin-bottom: 30px;
             font-size: 1.1em;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
         }
         
         .input-section {
@@ -221,7 +227,10 @@
 <body>
     <div class="container">
         <h1>⚛️ Physics Problem Solver</h1>
-        <p class="subtitle">Plugin Architecture | V3 System</p>
+        <p class="subtitle">
+            Plugin Architecture | V3 System
+            <span class="badge" id="statusBadge">🌍 Online</span>
+        </p>
         
         <!-- Input Section -->
         <div class="input-section">
@@ -283,11 +292,26 @@
     </div>
 
     <script>
-        /* ============================================ */
-        /* JAVASCRIPT - Makes the page interactive     */
-        /* You don't need to understand this!          */
-        /* It just talks to your Julia server          */
-        /* ============================================ */
+        // =============================================================================
+        // SMART API URL DETECTION
+        // Works both locally (localhost:8000) and in production (Railway)
+        // =============================================================================
+        
+        function getApiUrl() {
+            // If we're on localhost, use localhost API
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return 'http://localhost:8000';
+            }
+            // Otherwise, use same domain as the page (for Railway)
+            return window.location.origin;
+        }
+        
+        const API_URL = getApiUrl();
+        console.log('Using API URL:', API_URL);
+        
+        // =============================================================================
+        // USER INTERACTIONS
+        // =============================================================================
         
         // Allow Enter key to submit
         document.getElementById('problemInput').addEventListener('keypress', function(e) {
@@ -309,7 +333,10 @@
             document.getElementById('problemInput').focus();
         }
         
-        // Main function: Send problem to Julia server
+        // =============================================================================
+        // MAIN SOLVE FUNCTION
+        // =============================================================================
+        
         async function solveProblem() {
             const input = document.getElementById('problemInput').value.trim();
             
@@ -324,7 +351,7 @@
             
             try {
                 // Send request to Julia server
-                const response = await fetch('http://localhost:8000/solve', {
+                const response = await fetch(`${API_URL}/solve`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -342,11 +369,15 @@
                 
             } catch (error) {
                 document.getElementById('loading').style.display = 'none';
-                displayError('Could not connect to Julia server. Make sure gui_server.jl is running!');
+                displayError('Could not connect to server. Make sure the backend is running!');
+                console.error('Connection error:', error);
             }
         }
         
-        // Display successful result
+        // =============================================================================
+        // DISPLAY FUNCTIONS
+        // =============================================================================
+        
         function displayResult(data) {
             const resultSection = document.getElementById('resultSection');
             const resultHeader = document.getElementById('resultHeader');
@@ -392,7 +423,6 @@
             resultSection.style.display = 'block';
         }
         
-        // Display error message
         function displayError(message) {
             const resultSection = document.getElementById('resultSection');
             const resultHeader = document.getElementById('resultHeader');
@@ -403,6 +433,27 @@
             resultContent.innerHTML = `<p>${message}</p>`;
             resultSection.style.display = 'block';
         }
+        
+        // =============================================================================
+        // SERVER STATUS CHECK
+        // =============================================================================
+        
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                if (data.status === 'healthy') {
+                    document.getElementById('statusBadge').innerHTML = '🌍 Online';
+                    document.getElementById('statusBadge').style.background = '#28a745';
+                }
+            } catch (error) {
+                document.getElementById('statusBadge').innerHTML = '⚠️ Offline';
+                document.getElementById('statusBadge').style.background = '#dc3545';
+            }
+        }
+        
+        // Check status on page load
+        checkServerStatus();
     </script>
 </body>
 </html>

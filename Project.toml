@@ -1,0 +1,14 @@
+name = "PhysicsSolver"
+uuid = "12345678-1234-1234-1234-123456789012"
+authors = ["Your Name"]
+version = "1.0.0"
+
+[deps]
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[compat]
+HTTP = "1"
+JSON = "0.21"
+julia = "1.6"
