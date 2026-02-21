@@ -8,7 +8,7 @@ using Printf
 
 # Load your physics solver files
 include("abstract_solver.jl")
-include("thermodynamics.jl")
+include("thermo.jl")
 include("registry.jl")
 include("tokenizer.jl")
 include("dispatcher.jl")
