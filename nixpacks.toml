@@ -1,5 +1,0 @@
-[phases.setup]
-nixPkgs = ["julia_19-bin"]
-
-[phases.install]
-cms = ["julia --project=. -e 'using Pkg; Pkg.instantiate()'"]
