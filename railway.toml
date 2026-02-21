@@ -1,0 +1,7 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "julia --project=. gui_server.jl"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
