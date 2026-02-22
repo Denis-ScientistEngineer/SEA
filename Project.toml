@@ -1,9 +1,0 @@
-name = "PhysicsSolver"
-version = "1.0.0"
-
-[deps]
-HTTP = "0.9"
-JSON = "0.21"
-
-[compat]
-julia = "1.9"
