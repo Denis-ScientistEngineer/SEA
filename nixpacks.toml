@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["julia_19-bin"]
+
+[phases.install]
+cmds = ["julia --project=. -e 'using Pkg; Pkg.instantiate()'"]
+
+[start]
+cmd = "julia --project=. server.jl"
