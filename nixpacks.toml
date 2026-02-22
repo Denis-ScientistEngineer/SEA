@@ -1,5 +1,3 @@
-# nixpacks.toml - Tells Railway to install Julia
-
 [phases.setup]
 nixPkgs = ["julia_19-bin"]
 
@@ -7,4 +5,4 @@ nixPkgs = ["julia_19-bin"]
 cmds = ["julia --project=. -e 'using Pkg; Pkg.instantiate()'"]
 
 [start]
-cmd = "julia --project=. gui_server.jl"
+cmd = "julia --project=. server.jl"
