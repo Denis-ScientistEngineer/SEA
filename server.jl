@@ -1,3 +1,8 @@
+
+# =============================================================================
+# server.jl - Production Web Server
+# =============================================================================
+
 using HTTP
 using JSON
 using Printf
@@ -14,23 +19,33 @@ println("🚀 Initializing Physics Solver...")
 # Register solvers
 register_solver(FirstLawSolver())
 
-println("✓ Solvers registered!")
+println("✓ Solvers registered: $(length(get_all_solvers()))")
 
-# API function
+# =============================================================================
+# API ENDPOINT
+# =============================================================================
+
 function solve_api(input::String)
     try
         values = parse_input(input)
         
         if values === nothing
-            return Dict("success" => false, "error" => "Could not parse input")
+            return Dict(
+                "success" => false,
+                "error" => "Could not parse input. Use format: Q=100, W=40"
+            )
         end
         
         outcome = dispatch_and_solve(values)
         
         if outcome === nothing
-            return Dict("success" => false, "error" => "No solver found")
+            return Dict(
+                "success" => false,
+                "error" => "No solver found for these variables"
+            )
         end
         
+        # Format results
         result_strings = Dict{String, String}()
         for (var, val) in outcome.result
             val_str = @sprintf("%.4f", val)
@@ -43,77 +58,110 @@ function solve_api(input::String)
             "domain" => string(get_domain(outcome.solver)),
             "results" => result_strings
         )
+        
     catch e
-        return Dict("success" => false, "error" => "Error: $(e)")
+        return Dict(
+            "success" => false,
+            "error" => "Error: $(e)"
+        )
     end
 end
 
-# Request handler
-function handle_request(req)
+# =============================================================================
+# REQUEST HANDLER
+# =============================================================================
+
+function handle_request(req::HTTP.Request)
     path = HTTP.URIs.URI(req.target).path
     
-    cors = [
+    # CORS headers for frontend
+    cors_headers = [
         "Access-Control-Allow-Origin" => "*",
         "Access-Control-Allow-Methods" => "POST, GET, OPTIONS",
         "Access-Control-Allow-Headers" => "Content-Type"
     ]
     
+    # Handle preflight requests
     if req.method == "OPTIONS"
-        return HTTP.Response(200, cors, "")
+        return HTTP.Response(200, cors_headers, "")
     end
     
+    # Serve the HTML page
     if path == "/"
-        # Simple test page for now
-        return HTTP.Response(200, """
-            <!DOCTYPE html>
-            <html>
-            <head><title>Physics Solver</title></head>
-            <body>
-                <h1>✅ Physics Solver Online!</h1>
-                <p>Try: <code>/solve</code> endpoint</p>
-                <button onclick="test()">Test Solver</button>
-                <div id="result"></div>
-                <script>
-                async function test() {
-                    const res = await fetch('/solve', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({input: 'Q=100, W=40'})
-                    });
-                    const data = await res.json();
-                    document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
-                }
-                </script>
-            </body>
-            </html>
-        """)
-        
-    elseif path == "/solve"
-        body = String(req.body)
-        
-        # Handle empty body
-        if isempty(body)
-            return HTTP.Response(400, vcat(cors, ["Content-Type" => "application/json"]),
-                "{\"success\": false, \"error\": \"Empty request\"}")
+        html_file = "index.html"
+        if isfile(html_file)
+            html_content = read(html_file, String)
+            return HTTP.Response(200, 
+                ["Content-Type" => "text/html; charset=utf-8"], 
+                html_content)
+        else
+            return HTTP.Response(404, "index.html not found!")
         end
         
+    # API endpoint - solve a problem
+    elseif path == "/solve"
+        body = String(req.body)
         data = JSON.parse(body)
         input = data["input"]
         
         println("📝 Solving: $input")
         result = solve_api(input)
         
+        response_json = JSON.json(result)
         return HTTP.Response(200, 
-            vcat(cors, ["Content-Type" => "application/json"]),
-            JSON.json(result))
+            vcat(cors_headers, ["Content-Type" => "application/json"]),
+            response_json)
+    
+    # List available solvers
+    elseif path == "/solvers"
+        solvers = []
+        for solver in get_all_solvers()
+            push!(solvers, Dict(
+                "name" => string(typeof(solver)),
+                "domain" => string(get_domain(solver))
+            ))
+        end
+        
+        response_json = JSON.json(Dict("solvers" => solvers))
+        return HTTP.Response(200,
+            vcat(cors_headers, ["Content-Type" => "application/json"]),
+            response_json)
+    
+    # Health check endpoint (for Railway)
+    elseif path == "/health"
+        return HTTP.Response(200, 
+            ["Content-Type" => "application/json"],
+            JSON.json(Dict("status" => "healthy", "solvers" => length(get_all_solvers()))))
+        
     else
         return HTTP.Response(404, "Not found")
     end
 end
 
-# Start server
-port = parse(Int, get(ENV, "PORT", "8000"))
-host = "0.0.0.0"
+# =============================================================================
+# START SERVER
+# =============================================================================
 
-println("🌐 Starting server on port $port...")
-HTTP.serve(handle_request, host, port)
+function start_server()
+    # CRITICAL: Get port from Railway environment variable
+    port = parse(Int, get(ENV, "PORT", "8000"))
+    
+    # CRITICAL: Listen on 0.0.0.0 for Railway (not 127.0.0.1!)
+    host = "0.0.0.0"
+    
+    println("\n" * "="^60)
+    println("🌐 Physics Solver Web Server Starting...")
+    println("="^60)
+    println("\n📍 Server running on port: $port")
+    println("🌍 Listening on: $host")
+    println("\n⏹️  Press Ctrl+C to stop")
+    println("="^60 * "\n")
+    
+    # Start the HTTP server
+    HTTP.serve(handle_request, host, port)
+end
+
+# Run the server
+if abspath(PROGRAM_FILE) == @__FILE__
+    start_server()
+end
