@@ -18,6 +18,8 @@ println("🚀 Initializing Physics Solver...")
 
 # Register solvers
 register_solver(FirstLawSolver())
+register_solver(IdealGasSolver()) 
+register_solver(HeatCapacitySolver()) 
 
 println("✓ Solvers registered: $(length(get_all_solvers()))")
 
