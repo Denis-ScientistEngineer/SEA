@@ -10,9 +10,11 @@ using Printf
 # Load physics files
 include("abstract_solver.jl")
 include("thermodynamics.jl")
+include("electromagnetics.jl")
 include("registry.jl")
 include("tokenizer.jl")
 include("dispatcher.jl")
+
 
 println("🚀 Initializing Physics Solver...")
 
@@ -20,6 +22,9 @@ println("🚀 Initializing Physics Solver...")
 register_solver(FirstLawSolver())
 register_solver(IdealGasSolver()) 
 register_solver(HeatCapacitySolver()) 
+register_solver(PointChargeFieldSolver())
+register_solver(ElectricPotentialSolver())
+register_solver(CoulombForceSolver())
 
 println("✓ Solvers registered: $(length(get_all_solvers()))")
 
