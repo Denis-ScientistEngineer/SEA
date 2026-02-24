@@ -22,9 +22,16 @@ println("🚀 Initializing Physics Solver...")
 register_solver(FirstLawSolver())
 register_solver(IdealGasSolver()) 
 register_solver(HeatCapacitySolver()) 
+# Register electromagnetics solvers
 register_solver(PointChargeFieldSolver())
 register_solver(ElectricPotentialSolver())
 register_solver(CoulombForceSolver())
+register_solver(InfiniteLineChargeSolver())
+register_solver(InfinitePlaneSolver())
+register_solver(ChargedRingSolver())
+register_solver(ChargedDiskSolver())
+register_solver(FiniteLineChargeSolver())
+register_solver(ParallelPlateCapacitorSolver())
 
 println("✓ Solvers registered: $(length(get_all_solvers()))")
 

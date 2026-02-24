@@ -50,6 +50,16 @@ function initialize_solvers()
     register_solver(FirstLawSolver())        # ΔU = Q - W
     register_solver(IdealGasSolver())        # PV = nRT
     register_solver(HeatCapacitySolver())    # Q = mcΔT
+    # Register electromagnetics solvers
+    register_solver(PointChargeFieldSolver())
+    register_solver(ElectricPotentialSolver())
+    register_solver(CoulombForceSolver())
+    register_solver(InfiniteLineChargeSolver())
+    register_solver(InfinitePlaneSolver())
+    register_solver(ChargedRingSolver())
+    register_solver(ChargedDiskSolver())
+    register_solver(FiniteLineChargeSolver())
+    register_solver(ParallelPlateCapacitorSolver())
     println("Done.\n")
 end
 
