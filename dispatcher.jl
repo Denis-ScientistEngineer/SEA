@@ -11,46 +11,68 @@
 
 # THE MAIN DISPATCHER function
 
-function find_solver(variables::Set{Symbol})::Union{PhysicsSolver, Nothing}
-    println("→Dispatcher searching for solver that can handles: $variables")
-
-    #Ask every solver in the registry
+# Find the best solver for given variables
+function find_solver(values::Dict{Symbol, Float64})
+    variable_names = Set(keys(values))
+    candidates = []
+    
+    # Find all solvers that CAN handle these variables
     for solver in get_all_solvers()
-        if can_solve(solver, variables)
-            println(" →Dispatcher found: $(typeof(solver))")
-            return solver
+        if can_solve(solver, variable_names)
+            # Also check if inputs are actually valid
+            if validate_inputs(solver, values)
+                priority = get_priority(solver)
+                push!(candidates, (solver=solver, priority=priority))
+            end
         end
     end
-
-    # Nobody says yes
-    println(" →Dispatcher: No solver found for variables: $variables")
+    
+    # Sort by priority (highest first)
+    sort!(candidates, by=x -> x.priority, rev=true)
+    
+    # Return the highest priority solver
+    if !isempty(candidates)
+        return candidates[1].solver
+    end
+    
     return nothing
 end
 
-
-# This combines finding + solving into one step
-
+# Dispatch and solve
 function dispatch_and_solve(values::Dict{Symbol, Float64})
-    # Extract variable names Only
-    variable_names = Set(keys(values))
-
-    # ask the registry to find us a solver
-    solver = find_solver(variable_names)
-
-    # if nobody can solve this stop here
+    solver = find_solver(values)
+    
     if solver === nothing
-        println("\n Error: No solver found.")
-        println("Variables you provided: $(join(variable_names, ","))")
-        println("Registered solvers handle: ")
-        for s in get_all_solvers()
-            println("   .$(typeof(s))")
-        end
         return nothing
     end
+    
+    try
+        result = solve(solver, values)
+        return (solver=solver, result=result)
+    catch e
+        println("⚠️  Solver $(typeof(solver)) failed: $e")
+        return nothing
+    end
+end
 
-    # I found a solver! Run it.
-    println("→Dispatching to $(typeof(solver))...")
-    result = solve(solver, values)
-
-    return (solver=solver, result=result)
+# NEW: Get all matching solvers (for debugging/testing)
+function find_all_matching_solvers(values::Dict{Symbol, Float64})
+    variable_names = Set(keys(values))
+    matches = []
+    
+    for solver in get_all_solvers()
+        can_handle = can_solve(solver, variable_names)
+        is_valid = can_handle ? validate_inputs(solver, values) : false
+        priority = get_priority(solver)
+        
+        push!(matches, Dict(
+            "solver" => string(typeof(solver)),
+            "can_handle" => can_handle,
+            "is_valid" => is_valid,
+            "priority" => priority,
+            "description" => get_description(solver)
+        ))
+    end
+    
+    return matches
 end

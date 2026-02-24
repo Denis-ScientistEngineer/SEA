@@ -25,3 +25,19 @@ end
 function get_domain(solver::PhysicsSolver)::Symbol
     error("$(typeof(solver)) must implement get_domain()!")
 end
+
+
+# NEW: Optional priority function to help dispatcher choose between multiple solvers
+function get_priority(solver::PhysicsSolver)::Int
+    return 50 # Medium priority by default
+end
+
+# NEW: Optional function to check if solver can ACTUALLY solve( not just recognize variables)
+function validate_inputs(solver::PhysicsSolver, values::Dict{Symbol, Float64})::Bool
+    return true # Assume valid by default, solvers can override this
+end
+
+# NEW: Get solver description
+function get_description(solver::PhysicsSolver)::String
+    return String(typeof(solver))
+end

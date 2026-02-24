@@ -156,6 +156,7 @@ function start_server()
     println("="^60)
     println("\n📍 Server running on port: $port")
     println("🌍 Listening on: $host")
+    println("Access at: http://localhost:$port/")
     println("\n⏹️  Press Ctrl+C to stop")
     println("="^60 * "\n")
     
