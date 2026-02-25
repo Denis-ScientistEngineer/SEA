@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Physics Problem Solver</title>
     <style>
-        /* ============================================ */
-        /* STYLING - Makes everything look pretty      */
-        /* You don't need to understand this!          */
-        /* ============================================ */
-        
+        /* Base styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -25,34 +21,67 @@
             align-items: center;
             padding: 20px;
         }
-        
+
         .container {
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 800px;
+            max-width: 1400px;
             width: 100%;
             padding: 40px;
         }
-        
+
         h1 {
             color: #667eea;
             text-align: center;
             margin-bottom: 10px;
             font-size: 2.5em;
         }
-        
+
         .subtitle {
             text-align: center;
             color: #666;
             margin-bottom: 30px;
             font-size: 1.1em;
         }
-        
-        .input-section {
-            margin-bottom: 30px;
+
+        .badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
         }
-        
+
+        /* TWO-COLUMN LAYOUT */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        /* Left column: Input and Examples */
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Right column: Results */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Input section */
+        .input-section {
+            margin-bottom: 0;
+        }
+
         label {
             display: block;
             margin-bottom: 10px;
@@ -60,7 +89,7 @@
             font-weight: bold;
             font-size: 1.1em;
         }
-        
+
         #problemInput {
             width: 100%;
             padding: 15px;
@@ -70,18 +99,18 @@
             transition: border-color 0.3s;
             font-family: 'Courier New', monospace;
         }
-        
+
         #problemInput:focus {
             outline: none;
             border-color: #667eea;
         }
-        
+
         .button-group {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-top: 15px;
         }
-        
+
         button {
             flex: 1;
             padding: 15px 30px;
@@ -92,38 +121,51 @@
             transition: all 0.3s;
             font-weight: bold;
         }
-        
+
         .solve-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        
+
         .solve-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
-        
+
         .clear-btn {
             background: #f0f0f0;
             color: #333;
         }
-        
+
         .clear-btn:hover {
             background: #e0e0e0;
         }
-        
+
+        /* Examples section */
         .examples {
             background: #f8f9fa;
             padding: 20px;
             border-radius: 10px;
-            margin-bottom: 20px;
+            max-height: 500px;
+            overflow-y: auto;
         }
-        
+
         .examples h3 {
             color: #667eea;
             margin-bottom: 10px;
+            position: sticky;
+            top: 0;
+            background: #f8f9fa;
+            padding: 10px 0;
+            z-index: 1;
         }
-        
+
+        .examples h4 {
+            color: #764ba2;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+
         .example-item {
             background: white;
             padding: 10px;
@@ -133,71 +175,26 @@
             transition: all 0.2s;
             border-left: 4px solid #667eea;
         }
-        
+
         .example-item:hover {
             background: #e3e8ff;
             transform: translateX(5px);
         }
-        
+
         .example-code {
             font-family: 'Courier New', monospace;
             font-weight: bold;
             color: #764ba2;
+            font-size: 0.9em;
         }
-        
-        .result-section {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 10px;
-            display: none;
-        }
-        
-        .result-success {
-            background: #d4edda;
-            border: 2px solid #28a745;
-        }
-        
-        .result-error {
-            background: #f8d7da;
-            border: 2px solid #dc3545;
-        }
-        
-        .result-header {
-            font-size: 1.3em;
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .result-grid {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 10px;
-            margin-top: 15px;
-            background: white;
-            padding: 15px;
-            border-radius: 5px;
-        }
-        
-        .result-label {
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .result-value {
-            color: #667eea;
-            font-family: 'Courier New', monospace;
-            font-size: 1.1em;
-        }
-        
+
+        /* Loading spinner */
         .loading {
             display: none;
             text-align: center;
             padding: 20px;
         }
-        
+
         .spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #667eea;
@@ -207,126 +204,226 @@
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
+        /* Result section - NOW IN RIGHT COLUMN */
+        .result-section {
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            min-height: 300px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .result-success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+        }
+
+        .result-error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+        }
+
+        .result-header {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            margin-top: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .result-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .result-value {
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            word-break: break-all;
+        }
+
         .emoji {
             font-size: 1.5em;
+        }
+
+        /* RESPONSIVE: Stack on mobile */
+        @media (max-width: 968px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-section {
+                position: relative;
+                top: 0;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+        }
+
+        /* Scrollbar styling */
+        .examples::-webkit-scrollbar,
+        .result-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .examples::-webkit-scrollbar-track,
+        .result-grid::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .examples::-webkit-scrollbar-thumb,
+        .result-grid::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .examples::-webkit-scrollbar-thumb:hover,
+        .result-grid::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>⚛️ Physics Problem Solver</h1>
-        <p class="subtitle">Plugin Architecture | V3 System</p>
+        <p class="subtitle">
+            Plugin Architecture | V3 System
+            <span class="badge" id="statusBadge">🌍 Online</span>
+        </p>
         
-        <!-- Input Section -->
-        <div class="input-section">
-            <label for="problemInput">Enter your problem:</label>
-            <input 
-                type="text" 
-                id="problemInput" 
-                placeholder="Q=100, W=40"
-                autofocus
-            >
-        </div>
-        
-        <!-- Buttons -->
-        <div class="button-group">
-            <button class="solve-btn" onclick="solveProblem()">
-                🚀 Solve Problem
-            </button>
-            <button class="clear-btn" onclick="clearAll()">
-                🗑️ Clear
-            </button>
-        </div>
-        
-        <!-- Examples -->
-        <div class="examples">
-            <h3>📚 Click an example to try it:</h3>
-            <div class="example-item" onclick="useExample('Q=100, W=40')">
-                <strong>First Law:</strong> 
-                <span class="example-code">Q=100, W=40</span>
-                <span style="color: #666; margin-left: 10px;">→ finds ΔU</span>
+        <!-- TWO-COLUMN LAYOUT -->
+        <div class="main-layout">
+            
+            <!-- LEFT COLUMN: Input and Examples -->
+            <div class="left-column">
+                <!-- Input Section -->
+                <div class="input-section">
+                    <label for="problemInput">Enter your problem:</label>
+                    <input 
+                        type="text" 
+                        id="problemInput" 
+                        placeholder="Q=100, W=40"
+                        autofocus
+                    >
+                    
+                    <!-- Buttons -->
+                    <div class="button-group">
+                        <button class="solve-btn" onclick="solveProblem()">
+                            🚀 Solve Problem
+                        </button>
+                        <button class="clear-btn" onclick="clearAll()">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Examples -->
+                <div class="examples">
+                    <h3>📚 Click an example to try it:</h3>
+                    
+                    <h4>🔥 Thermodynamics:</h4>
+                    
+                    <div class="example-item" onclick="useExample('Q=100, W=40')">
+                        <strong>First Law:</strong> 
+                        <span class="example-code">Q=100, W=40</span>
+                        <span style="color: #666; margin-left: 10px;">→ finds ΔU</span>
+                    </div>
+                    
+                    <div class="example-item" onclick="useExample('heat=200, work=80')">
+                        <strong>Using aliases:</strong> 
+                        <span class="example-code">heat=200, work=80</span>
+                        <span style="color: #666; margin-left: 10px;">→ finds ΔU</span>
+                    </div>
+                    
+                    <div class="example-item" onclick="useExample('P=101325, V=0.5, T=300')">
+                        <strong>Ideal Gas:</strong> 
+                        <span class="example-code">P=101325, V=0.5, T=300</span>
+                        <span style="color: #666; margin-left: 10px;">→ finds n</span>
+                    </div>
+                    
+                    <div class="example-item" onclick="useExample('Q=8372, m=2, c=4186')">
+                        <strong>Heat Capacity:</strong> 
+                        <span class="example-code">Q=8372, m=2, c=4186</span>
+                        <span style="color: #666; margin-left: 10px;">→ finds ΔT</span>
+                    </div>
+                    
+                    <h4>⚡ Electromagnetics:</h4>
+                    
+                    <div class="example-item" onclick="useExample('Q=1e-6, x=1, y=0, z=0, x0=0, y0=0, z0=0')">
+                        <strong>Point Charge:</strong> 
+                        <span class="example-code">Q=1e-6, x=1, y=0, z=0, x0=0, y0=0, z0=0</span>
+                        <span style="color: #666; margin-left: 10px;">→ finds E⃗</span>
+                    </div>
+                    
+                    <div class="example-item" onclick="useExample('Q1=1e-6, Q2=-1e-6, x1=0, y1=0, z1=0, x2=1, y2=0, z2=0')">
+                        <strong>Coulomb Force:</strong> 
+                        <span class="example-code">Q1=1e-6, Q2=-1e-6, x1=0, y1=0, z1=0, x2=1, y2=0, z2=0</span>
+                        <span style="color: #666; margin-left: 10px;">→ finds F⃗</span>
+                    </div>
+                    
+                    <div class="example-item" onclick="useExample('lambda=1e-9, x=0.1, y=0.2')">
+                        <strong>Infinite Line:</strong> 
+                        <span class="example-code">lambda=1e-9, x=0.1, y=0.2</span>
+                        <span style="color: #666; margin-left: 10px;">→ finds E⃗</span>
+                    </div>
+                    
+                    <div class="example-item" onclick="useExample('Q=1e-8, R=0.1, z=0.05')">
+                        <strong>Charged Ring:</strong> 
+                        <span class="example-code">Q=1e-8, R=0.1, z=0.05</span>
+                        <span style="color: #666; margin-left: 10px;">→ finds E on axis</span>
+                    </div>
+                    
+                    <div class="example-item" onclick="useExample('A=0.01, d=0.001, Q=1e-9, V=100')">
+                        <strong>Capacitor:</strong> 
+                        <span class="example-code">A=0.01, d=0.001, Q=1e-9, V=100</span>
+                        <span style="color: #666; margin-left: 10px;">→ finds C, E</span>
+                    </div>
+                </div>
             </div>
-            <div class="example-item" onclick="useExample('heat=200, work=80')">
-                <strong>Using aliases:</strong> 
-                <span class="example-code">heat=200, work=80</span>
-                <span style="color: #666; margin-left: 10px;">→ finds ΔU</span>
+            
+            <!-- RIGHT COLUMN: Results -->
+            <div class="right-column">
+                <!-- Loading Spinner -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Solving...</p>
+                </div>
+                
+                <!-- Result Section -->
+                <div class="result-section" id="resultSection">
+                    <div class="result-header" id="resultHeader"></div>
+                    <div id="resultContent"></div>
+                </div>
             </div>
-            <div class="example-item" onclick="useExample('P=101325, V=0.5, T=300')">
-                <strong>Ideal Gas:</strong> 
-                <span class="example-code">P=101325, V=0.5, T=300</span>
-                <span style="color: #666; margin-left: 10px;">→ finds n</span>
-            </div>
-            <div class="example-item" onclick="useExample('Q=8372, m=2, c=4186')">
-                <strong>Heat Capacity:</strong> 
-                <span class="example-code">Q=8372, m=2, c=4186</span>
-                <span style="color: #666; margin-left: 10px;">→ finds ΔT</span>
-            </div>
-            <div class="example-item" onclick="useExample('Q=1e-6, x=1, y=0, z=0, x0=0, y0=0, z0=0')">
-                <strong>Point Charge E-Field:</strong> 
-                <span class="example-code">Q=1e-6, x=1, y=0, z=0, x0=0, y0=0, z0=0</span>
-                <span style="color: #666; margin-left: 10px;">→ finds E⃗</span>
-            </div>
-            <div class="example-item" onclick="useExample('Q1=1e-6, Q2=-1e-6, x1=0, y1=0, z1=0, x2=1, y2=0, z2=0')">
-                <strong>Coulomb Force:</strong> 
-                <span class="example-code">Q1=1e-6, Q2=-1e-6, x1=0, y1=0, z1=0, x2=1, y2=0, z2=0</span>
-                <span style="color: #666; margin-left: 10px;">→ finds F⃗</span>
-            </div>
-            <!-- ELECTROMAGNETICS EXAMPLES -->
-            <h4 style="color: #667eea; margin-top: 20px;">⚡ Electromagnetics:</h4>
-
-            <div class="example-item" onclick="useExample('Q=1e-6, x=1, y=0, z=0, x0=0, y0=0, z0=0')">
-                <strong>Point Charge:</strong> 
-                <span class="example-code">Q=1e-6, x=1, y=0, z=0, x0=0, y0=0, z0=0</span>
-                <span style="color: #666; margin-left: 10px;">→ finds E⃗</span>
-            </div>
-
-            <div class="example-item" onclick="useExample('Q1=1e-6, Q2=-1e-6, x1=0, y1=0, z1=0, x2=1, y2=0, z2=0')">
-                <strong>Coulomb Force:</strong> 
-                <span class="example-code">Q1=1e-6, Q2=-1e-6, x1=0, y1=0, z1=0, x2=1, y2=0, z2=0</span>
-                <span style="color: #666; margin-left: 10px;">→ finds F⃗</span>
-            </div>
-
-            <div class="example-item" onclick="useExample('lambda=1e-9, x=0.1, y=0.2')">
-                <strong>Infinite Line:</strong> 
-                <span class="example-code">lambda=1e-9, x=0.1, y=0.2</span>
-                <span style="color: #666; margin-left: 10px;">→ finds E⃗</span>
-            </div>
-
-            <div class="example-item" onclick="useExample('Q=1e-8, R=0.1, z=0.05')">
-                <strong>Charged Ring:</strong> 
-                <span class="example-code">Q=1e-8, R=0.1, z=0.05</span>
-                <span style="color: #666; margin-left: 10px;">→ finds E on axis</span>
-            </div>
-
-            <div class="example-item" onclick="useExample('lambda=1e-9, x0=0, y0=0, z0=0, x1=1, y1=0, z1=0, x=0.5, y=0.5, z=0')">
-                <strong>Finite Line:</strong> 
-                <span class="example-code">lambda=1e-9, x0=0, y0=0, z0=0, x1=1, y1=0, z1=0, x=0.5, y=0.5, z=0</span>
-                <span style="color: #666; margin-left: 10px;">→ finds E⃗ (numerical)</span>
-            </div>
-
-            <div class="example-item" onclick="useExample('A=0.01, d=0.001, Q=1e-9, V=100')">
-                <strong>Capacitor:</strong> 
-                <span class="example-code">A=0.01, d=0.001, Q=1e-9, V=100</span>
-                <span style="color: #666; margin-left: 10px;">→ finds C, E</span>
-            </div>
-        </div>
-        
-        <!-- Loading Spinner -->
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Solving...</p>
-        </div>
-        
-        <!-- Result Section -->
-        <div class="result-section" id="resultSection">
-            <div class="result-header" id="resultHeader"></div>
-            <div id="resultContent"></div>
+            
         </div>
     </div>
 

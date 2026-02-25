@@ -17,7 +17,7 @@ function tokenize(input::String)::Vector{Token}
 
     # Regex pattern
     # is the 'serch pattern' that finds variable=value in any string
-    pattern = r"([a-zA-Z∆][a-zA-Z0-9_∆]*)\s*=\s*(-?\d+\.?\d*(?:[eE][+-]?\d+)?)"
+    pattern = r"([a-zA-ZΔδεσρμτ][a-zA-Z0-9_Δδεσρμτ]*)\s*=\s*(-?\d+\.?\d*(?:[eE][+-]?\d+)?)"
 
     #scan for every match in the input string
     for m in eachmatch(pattern, input)

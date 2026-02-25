@@ -60,9 +60,22 @@ function solve_api(input::String)
         end
         
         # Format results
+        # Format results with intelligent notation
         result_strings = Dict{String, String}()
         for (var, val) in outcome.result
-            val_str = @sprintf("%.4f", val)
+            # Smart formatting:
+            # - Very small/large: scientific notation (1.23e-06)
+            # - Normal range: decimal (0.0090)
+            if abs(val) < 1e-3 || abs(val) > 1e4
+                # Scientific notation for tiny or huge numbers
+                val_str = @sprintf("%.4e", val)
+            elseif abs(val) < 1.0
+                # More decimal places for numbers less than 1
+                val_str = @sprintf("%.6f", val)
+            else
+                # Standard format for normal numbers
+                val_str = @sprintf("%.4f", val)
+            end
             result_strings[string(var)] = val_str
         end
         
