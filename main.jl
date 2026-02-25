@@ -29,6 +29,7 @@ println("Loading system...")
 
 include("abstract_solver.jl")    # ← The contract (FIRST!)
 include("thermodynamics.jl")     # ← All thermodynamics solvers
+include("electromagnetics.jl")
 include("registry.jl")           # ← The phonebook of solvers
 include("tokenizer.jl")          # ← String → Dict conversion
 include("dispatcher.jl")         # ← Routes Dict to right solver
