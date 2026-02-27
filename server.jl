@@ -8,6 +8,7 @@ using JSON
 using Printf
 
 # Load physics files
+include("system_context.jl")
 include("abstract_solver.jl")
 include("thermodynamics.jl")
 include("electromagnetics.jl")
@@ -39,6 +40,8 @@ println("✓ Solvers registered: $(length(get_all_solvers()))")
 # API ENDPOINT
 # =============================================================================
 
+# Update the solve_api function in server.jl to show context info!
+
 function solve_api(input::String)
     try
         values = parse_input(input)
@@ -50,32 +53,39 @@ function solve_api(input::String)
             )
         end
         
-        outcome = dispatch_and_solve(values)
+        # Infer context
+        context = infer_context(values)
+        
+        outcome = dispatch_and_solve(values, context)
         
         if outcome === nothing
             return Dict(
                 "success" => false,
-                "error" => "No solver found for these variables"
+                "error" => "No solver found for these variables in $(context.regime) regime",
+                "regime" => string(context.regime),
+                "substance" => string(context.substance)
             )
         end
         
-        # Format results
-        # Format results with intelligent notation
+        # SMART FORMAT with units and context!
         result_strings = Dict{String, String}()
+        units = get_output_units(outcome.solver)
+        
         for (var, val) in outcome.result
-            # Smart formatting:
-            # - Very small/large: scientific notation (1.23e-06)
-            # - Normal range: decimal (0.0090)
+            # Format value
             if abs(val) < 1e-3 || abs(val) > 1e4
-                # Scientific notation for tiny or huge numbers
                 val_str = @sprintf("%.4e", val)
             elseif abs(val) < 1.0
-                # More decimal places for numbers less than 1
                 val_str = @sprintf("%.6f", val)
             else
-                # Standard format for normal numbers
                 val_str = @sprintf("%.4f", val)
             end
+            
+            # Add unit if available
+            if haskey(units, var)
+                val_str *= " " * units[var]
+            end
+            
             result_strings[string(var)] = val_str
         end
         
@@ -83,7 +93,14 @@ function solve_api(input::String)
             "success" => true,
             "solver" => string(typeof(outcome.solver)),
             "domain" => string(get_domain(outcome.solver)),
-            "results" => result_strings
+            "equation" => get_equation(outcome.solver),
+            "results" => result_strings,
+            # NEW: Context information!
+            "context" => Dict(
+                "regime" => string(context.regime),
+                "substance" => string(context.substance),
+                "description" => describe_regime(context.regime)
+            )
         )
         
     catch e
