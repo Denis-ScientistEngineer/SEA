@@ -492,27 +492,68 @@
         }
         
         // Display successful result
+        // Display successful result
         function displayResult(data) {
             const resultSection = document.getElementById('resultSection');
             const resultHeader = document.getElementById('resultHeader');
             const resultContent = document.getElementById('resultContent');
             
             if (data.success) {
-                // Success!
                 resultSection.className = 'result-section result-success';
                 resultHeader.innerHTML = '<span class="emoji">✅</span> Solution Found!';
                 
-                let html = `
+                let html = '';
+                
+                // Show equation and description
+                if (data.equation) {
+                    html += `
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #667eea;">
+                            <strong style="color: #667eea;">📐 Equation:</strong><br>
+                            <div style="font-size: 1.2em; font-family: 'Courier New', monospace; margin-top: 8px;">
+                                ${data.equation}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Show solver info
+                html += `
                     <div class="result-grid">
                         <div class="result-label">Solver:</div>
                         <div class="result-value">${data.solver}</div>
                         
                         <div class="result-label">Domain:</div>
                         <div class="result-value">${data.domain}</div>
-                    </div>
+                    `;
+                
+                // Show context info
+                if (data.context) {
+                    html += `
+                        <div class="result-label">Regime:</div>
+                        <div class="result-value">${data.context.regime}</div>
+                    `;
+                }
+                
+                html += '</div>';
+                
+                // Show step-by-step solution
+                if (data.solution && data.solution.steps) {
+                    html += `
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                            <strong style="color: #667eea; font-size: 1.1em;">📝 Step-by-Step Solution:</strong>
+                            <pre style="font-family: 'Courier New', monospace; white-space: pre-wrap; margin-top: 10px; color: #333; line-height: 1.6;">`;
                     
+                    for (const step of data.solution.steps) {
+                        html += step + '\n';
+                    }
+                    
+                    html += '</pre></div>';
+                }
+                
+                // Show results summary
+                html += `
                     <div style="margin-top: 20px;">
-                        <strong>Results:</strong>
+                        <strong style="font-size: 1.1em;">📊 Results Summary:</strong>
                     </div>
                     <div class="result-grid">
                 `;
@@ -528,10 +569,37 @@
                 resultContent.innerHTML = html;
                 
             } else {
-                // Error
                 resultSection.className = 'result-section result-error';
                 resultHeader.innerHTML = '<span class="emoji">❌</span> Error';
-                resultContent.innerHTML = `<p>${data.error}</p>`;
+                
+                let html = `<p style="margin-bottom: 15px;"><strong>${data.error}</strong></p>`;
+                
+                // Show input received
+                if (data.input_received) {
+                    html += '<div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">';
+                    html += '<strong>Input Received:</strong><br>';
+                    for (const [key, value] of Object.entries(data.input_received)) {
+                        html += `${key} = ${value}<br>`;
+                    }
+                    html += '</div>';
+                }
+                
+                // Show suggestions
+                if (data.suggestions && data.suggestions.length > 0) {
+                    html += '<div style="background: #d1ecf1; padding: 15px; border-radius: 5px; margin: 15px 0;">';
+                    html += '<strong>💡 Suggestions:</strong><ul style="margin: 10px 0; padding-left: 20px;">';
+                    for (const suggestion of data.suggestions) {
+                        html += `<li style="margin: 5px 0;">${suggestion}</li>`;
+                    }
+                    html += '</ul></div>';
+                }
+                
+                // Show hint
+                if (data.hint) {
+                    html += `<p style="margin-top: 10px;"><em>${data.hint}</em></p>`;
+                }
+                
+                resultContent.innerHTML = html;
             }
             
             resultSection.style.display = 'block';
