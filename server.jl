@@ -8,6 +8,7 @@ using JSON
 using Printf
 
 # Load physics files
+include("solution_formatter.jl")
 include("system_context.jl")
 include("abstract_solver.jl")
 include("thermodynamics.jl")
@@ -29,11 +30,122 @@ register_solver(CoulombForceSolver())
 register_solver(InfiniteLineChargeSolver())
 println("✓ Solvers registered: $(length(get_all_solvers()))")
 
+
+# =============================================================================
+# ERROR HANDLING WITH HELPFUL SUGGESTIONS
+# =============================================================================
+
+"""
+Generate helpful suggestions when no solver found
+"""
+function generate_suggestions(values::Dict{Symbol, Float64})::Vector{String}
+    suggestions = String[]
+    variables = Set(keys(values))
+    
+    # Check what domains might be close
+    
+    # Thermodynamics suggestions
+    thermo_vars = Set([:Q, :q, :heat, :W, :w, :work, :U, :u, :ΔU])
+    if length(intersect(variables, thermo_vars)) >= 1
+        push!(suggestions, "💡 For First Law of Thermodynamics, you need 2 of: Q (heat), W (work), ΔU (internal energy change)")
+    end
+    
+    gas_vars = Set([:P, :p, :V, :v, :T, :t, :n])
+    if length(intersect(variables, gas_vars)) >= 1
+        push!(suggestions, "💡 For Ideal Gas Law, you need 3 of: P (pressure), V (volume), n (moles), T (temperature)")
+    end
+    
+    heat_vars = Set([:Q, :q, :m, :c, :ΔT, :deltaT])
+    if length(intersect(variables, heat_vars)) >= 1
+        push!(suggestions, "💡 For Heat Capacity, you need 3 of: Q (heat), m (mass), c (specific heat), ΔT (temperature change)")
+    end
+    
+    # Electromagnetics suggestions
+    charge_vars = Set([:Q, :E, :V, :x, :y, :z])
+    if length(intersect(variables, charge_vars)) >= 1
+        push!(suggestions, "⚡ For Point Charge Field, you need: Q (charge), x, y, z (field point), x0, y0, z0 (charge location)")
+    end
+    
+    coulomb_vars = Set([:Q1, :Q2, :F])
+    if length(intersect(variables, coulomb_vars)) >= 1
+        push!(suggestions, "⚡ For Coulomb Force, you need: Q1, Q2 (charges), positions (x1,y1,z1) and (x2,y2,z2)")
+    end
+    
+    # If no specific suggestions, give general help
+    if isempty(suggestions)
+        push!(suggestions, "ℹ️ Available domains: Thermodynamics (Q, W, ΔU, P, V, T, n), Electromagnetics (Q, E, F, charges)")
+        push!(suggestions, "ℹ️ Try using scientific notation for small values: 1e-6 instead of 0.000001")
+    end
+    
+    return suggestions
+end
+
+"""
+List all available solvers with their requirements
+"""
+function list_available_solvers()::Vector{Dict{String, Any}}
+    solver_info = []
+    
+    for solver in get_all_solvers()
+        info = Dict{String, Any}(
+            "name" => string(typeof(solver)),
+            "domain" => string(get_domain(solver)),
+            "description" => get_description(solver),
+            "equation" => get_equation(solver)
+        )
+        push!(solver_info, info)
+    end
+    
+    return solver_info
+end
+
+"""
+Explain why specific solvers were rejected (for debugging)
+"""
+function explain_rejection(values::Dict{Symbol, Float64})::Dict{String, Any}
+    context = infer_context(values)
+    variable_names = Set(keys(values))
+    
+    rejections = []
+    
+    for solver in get_all_solvers()
+        reason = ""
+        
+        # Check context compatibility
+        if !is_context_compatible(solver, context)
+            required_regime = get_required_regime(solver)
+            reason = "Requires $(required_regime) regime, but detected $(context.regime)"
+        # Check variable matching
+        elseif !can_solve(solver, variable_names, context)
+            reason = "Missing required variables"
+        # Check input validation
+        elseif !validate_inputs(solver, values)
+            reason = "Invalid input values (check ranges: positive values, sufficient data)"
+        else
+            continue  # This solver would work!
+        end
+        
+        push!(rejections, Dict(
+            "solver" => string(typeof(solver)),
+            "reason" => reason
+        ))
+    end
+    
+    return Dict(
+        "context" => Dict(
+            "regime" => string(context.regime),
+            "substance" => string(context.substance),
+            "description" => describe_regime(context.regime)
+        ),
+        "rejections" => rejections
+    )
+end
 # =============================================================================
 # API ENDPOINT
 # =============================================================================
 
 # Update the solve_api function in server.jl to show context info!
+
 
 function solve_api(input::String)
     try
@@ -42,7 +154,13 @@ function solve_api(input::String)
         if values === nothing
             return Dict(
                 "success" => false,
-                "error" => "Could not parse input. Use format: Q=100, W=40"
+                "error" => "Could not parse input. Use format: Q=100, W=40",
+                "hint" => "Use scientific notation for small values: 1e-6, 2.5e-9, etc.",
+                "examples" => [
+                    "Q=100, W=40",
+                    "P=101325, V=0.5, T=300",
+                    "Q=1e-6, x=1, y=0, z=0, x0=0, y0=0, z0=0"
+                ]
             )
         end
         
@@ -52,15 +170,25 @@ function solve_api(input::String)
         outcome = dispatch_and_solve(values, context)
         
         if outcome === nothing
+            # Generate helpful error response
+            suggestions = generate_suggestions(values)
+            explanation = explain_rejection(values)
+            
             return Dict(
                 "success" => false,
-                "error" => "No solver found for these variables in $(context.regime) regime",
-                "regime" => string(context.regime),
-                "substance" => string(context.substance)
+                "error" => "No solver found for these variables",
+                "input_received" => Dict(string(k) => v for (k, v) in values),
+                "context" => explanation["context"],
+                "suggestions" => suggestions,
+                "hint" => "Make sure you have enough variables (typically need 2-3 known values)",
+                "debug" => explanation["rejections"]
             )
         end
         
-        # SMART FORMAT with units and context!
+        # SUCCESS! Now generate step-by-step solution...
+        # (We'll add this in Task 2)
+        
+        # SMART FORMAT with units
         result_strings = Dict{String, String}()
         units = get_output_units(outcome.solver)
         
@@ -87,8 +215,8 @@ function solve_api(input::String)
             "solver" => string(typeof(outcome.solver)),
             "domain" => string(get_domain(outcome.solver)),
             "equation" => get_equation(outcome.solver),
+            "description" => get_description(outcome.solver),
             "results" => result_strings,
-            # NEW: Context information!
             "context" => Dict(
                 "regime" => string(context.regime),
                 "substance" => string(context.substance),
@@ -99,12 +227,13 @@ function solve_api(input::String)
     catch e
         return Dict(
             "success" => false,
-            "error" => "Error: $(e)"
+            "error" => "Error: $(e)",
+            "hint" => "Check your input format and values"
         )
     end
 end
 
-# =============================================================================
+# =============================================================================# 
 # REQUEST HANDLER
 # =============================================================================
 
