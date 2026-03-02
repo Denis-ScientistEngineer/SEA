@@ -188,7 +188,7 @@ function solve_api(input::String)
         # SUCCESS! Now generate step-by-step solution...
 
         #Generate step by step solution
-        solutions_steps = format_solution(outcome.solver, values, outcome.result)
+        solution_steps = format_solution(outcome.solver, values, outcome.result)
         return Dict(
             "success" => true,
             "solver" => string(typeof(outcome.solver)),
@@ -226,19 +226,7 @@ function solve_api(input::String)
             result_strings[string(var)] = val_str
         end
         
-        return Dict(
-            "success" => true,
-            "solver" => string(typeof(outcome.solver)),
-            "domain" => string(get_domain(outcome.solver)),
-            "equation" => get_equation(outcome.solver),
-            "description" => get_description(outcome.solver),
-            "results" => result_strings,
-            "context" => Dict(
-                "regime" => string(context.regime),
-                "substance" => string(context.substance),
-                "description" => describe_regime(context.regime)
-            )
-        )
+        
         
     catch e
         return Dict(
