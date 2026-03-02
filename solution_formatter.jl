@@ -1,5 +1,6 @@
 # solution_formatter.jl - Generate Step-by-Step Solutions
 # Shows the work, not just the answer!
+# NOTE: Do NOT include other files here - they're already loaded in server.jl
 
 """
 Generate a human-readable step-by-step solution
@@ -7,8 +8,6 @@ Generate a human-readable step-by-step solution
 function format_solution(solver::PhysicsSolver, 
                         input_values::Dict{Symbol, Float64},
                         output_values::Dict{Symbol, Float64})::Dict{String, Any}
-    
-    solution = Dict{String, Any}()
     
     # Delegate to solver-specific formatter
     if typeof(solver) == FirstLawSolver
@@ -113,7 +112,6 @@ function format_ideal_gas_solution(input::Dict{Symbol, Float64},
     V = output[:V]
     n = output[:n]
     T = output[:T]
-    R = 8.314
     
     # Identify what was found
     found = Symbol()
