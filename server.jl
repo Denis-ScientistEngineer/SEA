@@ -8,7 +8,6 @@ using JSON
 using Printf
 
 # Load physics files
-include("solution_formatter.jl")
 include("system_context.jl")
 include("abstract_solver.jl")
 include("thermodynamics.jl")
@@ -16,6 +15,7 @@ include("electromagnetics.jl")
 include("registry.jl")
 include("tokenizer.jl")
 include("dispatcher.jl")
+include("solution_formatter.jl")
 
 
 println("🚀 Initializing Physics Solver...")
