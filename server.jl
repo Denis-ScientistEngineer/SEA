@@ -186,7 +186,23 @@ function solve_api(input::String)
         end
         
         # SUCCESS! Now generate step-by-step solution...
-        # (We'll add this in Task 2)
+
+        #Generate step by step solution
+        solutions_steps = format_solution(outcome.solver, values, outcome.result)
+        return Dict(
+            "success" => true,
+            "solver" => string(typeof(outcome.solver)),
+            "domain" => string(get_domain(outcome.solver)),
+            "equation" => get_equation(outcome.solver),
+            "description" => get_description(outcome.solver),
+            "results" => result_strings,
+            "solution" => solution_steps,
+            "context" => Dict(
+                "regime" => string(context.regime),
+                "substance" => string(context.substance),
+                "description" => describe_regime(context.regime)
+                )
+            )
         
         # SMART FORMAT with units
         result_strings = Dict{String, String}()
