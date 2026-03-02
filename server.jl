@@ -140,12 +140,11 @@ function explain_rejection(values::Dict{Symbol, Float64})::Dict{String, Any}
         "rejections" => rejections
     )
 end
-# =============================================================================
+# ============================================================================
 # API ENDPOINT
 # =============================================================================
 
 # Update the solve_api function in server.jl to show context info!
-
 
 function solve_api(input::String)
     try
@@ -180,29 +179,12 @@ function solve_api(input::String)
                 "input_received" => Dict(string(k) => v for (k, v) in values),
                 "context" => explanation["context"],
                 "suggestions" => suggestions,
-                "hint" => "Make sure you have enough variables (typically need 2-3 known values)",
-                "debug" => explanation["rejections"]
+                "hint" => "Make sure you have enough variables (typically need 2-3 known values)"
             )
         end
         
-        # SUCCESS! Now generate step-by-step solution...
-
-        #Generate step by step solution
+        # SUCCESS! Generate step-by-step solution
         solution_steps = format_solution(outcome.solver, values, outcome.result)
-        return Dict(
-            "success" => true,
-            "solver" => string(typeof(outcome.solver)),
-            "domain" => string(get_domain(outcome.solver)),
-            "equation" => get_equation(outcome.solver),
-            "description" => get_description(outcome.solver),
-            "results" => result_strings,
-            "solution" => solution_steps,
-            "context" => Dict(
-                "regime" => string(context.regime),
-                "substance" => string(context.substance),
-                "description" => describe_regime(context.regime)
-                )
-            )
         
         # SMART FORMAT with units
         result_strings = Dict{String, String}()
@@ -210,6 +192,7 @@ function solve_api(input::String)
         
         for (var, val) in outcome.result
             # Format value
+            val_str = ""
             if abs(val) < 1e-3 || abs(val) > 1e4
                 val_str = @sprintf("%.4e", val)
             elseif abs(val) < 1.0
@@ -226,16 +209,35 @@ function solve_api(input::String)
             result_strings[string(var)] = val_str
         end
         
-        
+        return Dict(
+            "success" => true,
+            "solver" => string(typeof(outcome.solver)),
+            "domain" => string(get_domain(outcome.solver)),
+            "equation" => get_equation(outcome.solver),
+            "description" => get_description(outcome.solver),
+            "results" => result_strings,
+            "solution" => solution_steps,
+            "context" => Dict(
+                "regime" => string(context.regime),
+                "substance" => string(context.substance),
+                "description" => describe_regime(context.regime)
+            )
+        )
         
     catch e
+        # Catch-all error handler
+        error_msg = string(e)
+        stacktrace_str = sprint(showerror, e, catch_backtrace())
+        
         return Dict(
             "success" => false,
-            "error" => "Error: $(e)",
-            "hint" => "Check your input format and values"
+            "error" => "Server error: $error_msg",
+            "hint" => "Check your input format and values",
+            "debug" => stacktrace_str
         )
     end
 end
+
 
 # =============================================================================# 
 # REQUEST HANDLER
