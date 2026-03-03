@@ -406,6 +406,31 @@
                         <span class="example-code">A=0.01, d=0.001, Q=1e-9, V=100</span>
                         <span style="color: #666; margin-left: 10px;">→ finds C, E</span>
                     </div>
+                    <h4 style="color: #28a745; margin-top: 20px;">⚙️ Thermodynamic Processes:</h4>
+
+                    <div class="example-item" onclick="useExample('P1=200000, V1=1.0, V2=0.5, isothermal=1')">
+                        <strong>Isothermal Compression:</strong> 
+                        <span class="example-code">P1=200000, V1=1.0, V2=0.5, isothermal=1</span>
+                        <span style="color: #666; margin-left: 10px;">→ finds P2, W</span>
+                    </div>
+                    
+                    <div class="example-item" onclick="useExample('P1=500000, V1=0.1, V2=0.3, gamma=1.4, adiabatic=1')">
+                        <strong>Adiabatic Expansion:</strong> 
+                        <span class="example-code">P1=500000, V1=0.1, V2=0.3, gamma=1.4, adiabatic=1</span>
+                        <span style="color: #666; margin-left: 10px;">→ finds P2, W (Q=0)</span>
+                    </div>
+                    
+                    <div class="example-item" onclick="useExample('P=101325, V1=0.5, T1=300, T2=600, isobaric=1')">
+                        <strong>Isobaric Heating:</strong> 
+                        <span class="example-code">P=101325, V1=0.5, T1=300, T2=600, isobaric=1</span>
+                        <span style="color: #666; margin-left: 10px;">→ finds V2, W</span>
+                    </div>
+                    
+                    <div class="example-item" onclick="useExample('V=0.5, P1=101325, T1=300, T2=600, isochoric=1')">
+                        <strong>Isochoric Heating:</strong> 
+                        <span class="example-code">V=0.5, P1=101325, T1=300, T2=600, isochoric=1</span>
+                        <span style="color: #666; margin-left: 10px;">→ finds P2, Q (W=0)</span>
+                    </div>
                 </div>
             </div>
             
