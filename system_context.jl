@@ -214,6 +214,7 @@ end
 
 Detect what substance we're dealing with based on variables
 """
+
 function infer_substance(values::Dict{Symbol, Float64})::SubstanceType
     # Electromagnetism variables
     if any(k in keys(values) for k in [:Q, :E, :V, :lambda, :sigma])
@@ -224,12 +225,19 @@ function infer_substance(values::Dict{Symbol, Float64})::SubstanceType
         end
     end
     
-    # Gas variables (P, V, T, n)
-    if any(k in keys(values) for k in [:P, :V, :n, :T])
+    # Gas variables (P, V, T, n) - INCLUDING PROCESS VARIABLES!
+    gas_vars = Set([:P, :p, :V, :v, :n, :T, :t, 
+                    :P1, :P2, :V1, :V2, :T1, :T2,  # ← ADD THESE!
+                    :isothermal, :adiabatic, :isobaric, :isochoric])  # ← AND THESE!
+    
+    if any(k in keys(values) for k in gas_vars)
         # Check if ideal gas regime (low P, high T)
-        if haskey(values, :P) && haskey(values, :T)
+        P = get(values, :P, get(values, :P1, get(values, :P2, nothing)))
+        T = get(values, :T, get(values, :T1, get(values, :T2, nothing)))
+        
+        if !isnothing(P) && !isnothing(T)
             # Ideal gas valid if P < 10 atm and T > 100K (rough)
-            if values[:P] < 1e6 && values[:T] > 100
+            if P < 1e6 && T > 100
                 return IDEAL_GAS
             else
                 return REAL_GAS
@@ -245,7 +253,6 @@ function infer_substance(values::Dict{Symbol, Float64})::SubstanceType
     
     return IDEAL_GAS  # Safe default
 end
-
 """
     infer_context(values::Dict{Symbol, Float64}) -> SystemContext
 
