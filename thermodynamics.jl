@@ -93,7 +93,7 @@ function can_solve(::IdealGasSolver, variables::Set{Symbol}, context::SystemCont
         end
     end
     
-    our_vars = Set([:P, :P1, :P2, :p, :p1, :p2,  :pressure, :V, :V1, :V2, :v1, :v2 :v, :volume, :n, :moles, :T, :T1, :T2, :t1, :t2 :t, :temperature])
+    our_vars = Set([:P, :P1, :P2, :p, :p1, :p2,  :pressure, :V, :V1, :V2, :v1, :v2 :v, :volume, :n, :moles, :T, :T1, :T2, :t1, :t2, :t, :temperature])
     return length(intersect(variables, our_vars)) >= 3
 end
 
