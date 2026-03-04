@@ -40,7 +40,7 @@ function validate_inputs(::IsothermalProcessSolver, values::Dict{Symbol, Float64
 end
 
 get_required_regime(::IsothermalProcessSolver) = CLASSICAL_MACRO
-get_required_substance(::IsothermalProcessSolver) = [IDEAL_GAS]
+get_required_substance(::IsothermalProcessSolver) = []
 get_physics_type(::IsothermalProcessSolver) = :ideal_gas_law
 get_priority(::IsothermalProcessSolver) = 75
 
@@ -128,7 +128,7 @@ function validate_inputs(::AdiabaticProcessSolver, values::Dict{Symbol, Float64}
 end
 
 get_required_regime(::AdiabaticProcessSolver) = CLASSICAL_MACRO
-get_required_substance(::AdiabaticProcessSolver) = [IDEAL_GAS]
+get_required_substance(::AdiabaticProcessSolver) = []
 get_physics_type(::AdiabaticProcessSolver) = :ideal_gas_law
 get_priority(::AdiabaticProcessSolver) = 80
 
@@ -219,7 +219,7 @@ function validate_inputs(::IsobaricProcessSolver, values::Dict{Symbol, Float64})
 end
 
 get_required_regime(::IsobaricProcessSolver) = CLASSICAL_MACRO
-get_required_substance(::IsobaricProcessSolver) = [IDEAL_GAS]
+get_required_substance(::IsobaricProcessSolver) = []
 get_physics_type(::IsobaricProcessSolver) = :ideal_gas_law
 get_priority(::IsobaricProcessSolver) = 75
 
@@ -306,7 +306,7 @@ function validate_inputs(::IsochoricProcessSolver, values::Dict{Symbol, Float64}
 end
 
 get_required_regime(::IsochoricProcessSolver) = CLASSICAL_MACRO
-get_required_substance(::IsochoricProcessSolver) = [IDEAL_GAS]
+get_required_substance(::IsochoricProcessSolver) = []
 get_physics_type(::IsochoricProcessSolver) = :ideal_gas_law
 get_priority(::IsochoricProcessSolver) = 75
 
@@ -389,7 +389,7 @@ function validate_inputs(::PolytropicProcessSolver, values::Dict{Symbol, Float64
 end
 
 get_required_regime(::PolytropicProcessSolver) = CLASSICAL_MACRO
-get_required_substance(::PolytropicProcessSolver) = [IDEAL_GAS]
+get_required_substance(::PolytropicProcessSolver) = []
 get_priority(::PolytropicProcessSolver) = 70
 
 get_description(::PolytropicProcessSolver) = "Polytropic Process (PVⁿ = constant)"
