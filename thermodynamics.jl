@@ -93,15 +93,15 @@ function can_solve(::IdealGasSolver, variables::Set{Symbol}, context::SystemCont
         end
     end
     
-    our_vars = Set([:P, :p, :pressure, :V, :v, :volume, :n, :moles, :T, :t, :temperature])
+    our_vars = Set([:P, :P1, :P2, :p, :p1, :p2,  :pressure, :V, :V1, :V2, :v1, :v2 :v, :volume, :n, :moles, :T, :T1, :T2, :t1, :t2 :t, :temperature])
     return length(intersect(variables, our_vars)) >= 3
 end
 
 function validate_inputs(::IdealGasSolver, values::Dict{Symbol, Float64})::Bool
-    P = get_any(values, :P, :p, :pressure)
-    V = get_any(values, :V, :v, :volume)
+    P = get_any(values, :P, :P1, :P2, :p1, :p2 :p, :pressure)
+    V = get_any(values, :V, :V1, :V2, :v1, :v2, :v, :volume)
     n = get_any(values, :n, :moles)
-    T = get_any(values, :T, :t, :temperature)
+    T = get_any(values, :T, :T1, :T2, :t1, :t2 :t, :temperature)
     
     # Need EXACTLY 3 known values
     known = count(!isnothing, [P, V, n, T])
