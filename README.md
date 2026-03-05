@@ -1,8 +1,5 @@
 # ⚛️ Physics Problem Solver: A Context-Aware Computational Framework
 
-[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://denis-sea.up.railway.app)
-[![Julia](https://img.shields.io/badge/julia-v1.9+-purple.svg)](https://julialang.org/)
-[![Status](https://img.shields.io/badge/status-active_development-blue.svg)]()
 
 > A novel computational framework for solving multi-domain physics problems using context-aware regime detection and boundary-based solver selection.
 
