@@ -11,8 +11,8 @@ using Printf
 include("system_context.jl")
 include("abstract_solver.jl")
 include("thermodynamics.jl")
-include("electromagnetics.jl")
 include("processes.jl")
+include("electromagnetics.jl")
 include("cycles.jl")
 include("registry.jl")
 include("tokenizer.jl")
@@ -35,7 +35,7 @@ register_solver(AdiabaticProcessSolver())
 register_solver(IsobaricProcessSolver())
 register_solver(IsochoricProcessSolver())
 register_solver(PolytropicProcessSolver())
-
+# cycles solvers
 register_solver(CarnotCycleSolver())
 register_solver(OttoCycleSolver())
 register_solver(DieselCycleSolver())
