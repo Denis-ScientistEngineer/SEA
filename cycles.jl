@@ -11,40 +11,40 @@ include("abstract_solver.jl")
 # Process 4-1: Adiabatic compression (return to start)
 # =============================================================================
 
+
+# =============================================================================
+# CARNOT CYCLE
+# =============================================================================
+
 struct CarnotCycleSolver <: PhysicsSolver end
 
 function can_solve(::CarnotCycleSolver, variables::Set{Symbol}, context::SystemContext)::Bool
-    if context.regime != CLASSICAL_MACRO
-        return false
-    end
-    
-    # Need: Th (hot temp), Tc (cold temp), and one of (Qh, Qc, W)
     has_cycle_marker = :carnot in variables || :carnot_cycle in variables
-    has_temps = (:Th in variables && :Tc in variables)
-    has_energy = :Qh in variables || :Qc in variables || :W in variables
+    has_temps = (:Th in variables && :Tc in variables) || 
+                (:T_hot in variables && :T_cold in variables)
+    has_energy = any(k in variables for k in [:Qh, :Qc, :Q_hot, :Q_cold, :W])
     
     return has_cycle_marker && has_temps && has_energy
 end
 
 function validate_inputs(::CarnotCycleSolver, values::Dict{Symbol, Float64})::Bool
-    Th = get(values, :Th, nothing)
-    Tc = get(values, :Tc, nothing)
+    Th = get(values, :Th, get(values, :T_hot, nothing))
+    Tc = get(values, :Tc, get(values, :T_cold, nothing))
     
     if isnothing(Th) || isnothing(Tc)
         return false
     end
     
-    # Temperatures must be positive and Th > Tc
     if Th <= 0 || Tc <= 0 || Th <= Tc
         return false
     end
     
-    # Need at least one energy value
-    has_energy = any(haskey(values, v) for v in [:Qh, :Qc, :W])
+    has_energy = any(haskey(values, v) for v in [:Qh, :Qc, :Q_hot, :Q_cold, :W])
     return has_energy
 end
 
 get_required_regime(::CarnotCycleSolver) = CLASSICAL_MACRO
+get_required_substance(::CarnotCycleSolver) = []  # No restriction
 get_physics_type(::CarnotCycleSolver) = :classical_thermodynamics
 get_priority(::CarnotCycleSolver) = 85
 
@@ -61,21 +61,17 @@ function get_output_units(::CarnotCycleSolver)::Dict{Symbol, String}
 end
 
 function solve(::CarnotCycleSolver, values::Dict{Symbol, Float64})
-    Th = values[:Th]
-    Tc = values[:Tc]
+    Th = get(values, :Th, values[:T_hot])
+    Tc = get(values, :Tc, values[:T_cold])
     
-    # Carnot efficiency (theoretical maximum)
     η = 1.0 - Tc / Th
-    values[:efficiency] = η * 100  # Convert to percentage
+    values[:efficiency] = η * 100
     
-    # Get known energy values
-    Qh = get(values, :Qh, nothing)
-    Qc = get(values, :Qc, nothing)
+    Qh = get(values, :Qh, get(values, :Q_hot, nothing))
+    Qc = get(values, :Qc, get(values, :Q_cold, nothing))
     W = get(values, :W, nothing)
     
-    # Energy relationships: W = Qh - Qc, η = W/Qh
     if !isnothing(Qh)
-        # Given Qh, calculate W and Qc
         if isnothing(W)
             W = η * Qh
             values[:W] = W
@@ -85,7 +81,6 @@ function solve(::CarnotCycleSolver, values::Dict{Symbol, Float64})
             values[:Qc] = Qc
         end
     elseif !isnothing(Qc)
-        # Given Qc, calculate Qh and W
         Qh = Qc / (1 - η)
         values[:Qh] = Qh
         if isnothing(W)
@@ -93,7 +88,6 @@ function solve(::CarnotCycleSolver, values::Dict{Symbol, Float64})
             values[:W] = W
         end
     elseif !isnothing(W)
-        # Given W, calculate Qh and Qc
         Qh = W / η
         values[:Qh] = Qh
         Qc = Qh - W
@@ -104,20 +98,12 @@ function solve(::CarnotCycleSolver, values::Dict{Symbol, Float64})
 end
 
 # =============================================================================
-# OTTO CYCLE - Gasoline Engine
-# Process 1-2: Adiabatic compression
-# Process 2-3: Isochoric heat addition (combustion)
-# Process 3-4: Adiabatic expansion (power stroke)
-# Process 4-1: Isochoric heat rejection
+# OTTO CYCLE
 # =============================================================================
 
 struct OttoCycleSolver <: PhysicsSolver end
 
 function can_solve(::OttoCycleSolver, variables::Set{Symbol}, context::SystemContext)::Bool
-    if context.regime != CLASSICAL_MACRO
-        return false
-    end
-    
     has_cycle_marker = :otto in variables || :otto_cycle in variables
     has_compression_ratio = :r in variables || :compression_ratio in variables
     has_gamma = :gamma in variables || :γ in variables
@@ -133,13 +119,7 @@ function validate_inputs(::OttoCycleSolver, values::Dict{Symbol, Float64})::Bool
         return false
     end
     
-    # Compression ratio must be > 1
-    if r <= 1
-        return false
-    end
-    
-    # Gamma typically 1.3-1.7
-    if γ < 1 || γ > 2
+    if r <= 1 || γ < 1 || γ > 2
         return false
     end
     
@@ -147,11 +127,12 @@ function validate_inputs(::OttoCycleSolver, values::Dict{Symbol, Float64})::Bool
 end
 
 get_required_regime(::OttoCycleSolver) = CLASSICAL_MACRO
+get_required_substance(::OttoCycleSolver) = []  # No restriction
 get_physics_type(::OttoCycleSolver) = :classical_thermodynamics
 get_priority(::OttoCycleSolver) = 85
 
 get_description(::OttoCycleSolver) = "Otto Cycle (Gasoline engine)"
-get_equation(::OttoCycleSolver) = "η = 1 - 1/rᵞ⁻¹"
+get_equation(::OttoCycleSolver) = "η = 1 - 1/r^(γ-1)"
 get_domain(::OttoCycleSolver) = :thermodynamics
 
 function get_output_units(::OttoCycleSolver)::Dict{Symbol, String}
@@ -162,17 +143,15 @@ function solve(::OttoCycleSolver, values::Dict{Symbol, Float64})
     r = get(values, :r, values[:compression_ratio])
     γ = get(values, :gamma, get(values, :γ, 1.4))
     
-    # Otto cycle efficiency
     η = 1.0 - 1.0 / (r^(γ - 1))
-    values[:efficiency] = η * 100  # Convert to percentage
+    values[:efficiency] = η * 100
     
-    # If initial conditions given, calculate state points
+    # Additional state calculations if initial conditions provided
     P1 = get(values, :P1, nothing)
     T1 = get(values, :T1, nothing)
     V1 = get(values, :V1, nothing)
     
     if !isnothing(P1) && !isnothing(T1) && !isnothing(V1)
-        # State 2: After adiabatic compression
         V2 = V1 / r
         P2 = P1 * r^γ
         T2 = T1 * r^(γ - 1)
@@ -180,52 +159,18 @@ function solve(::OttoCycleSolver, values::Dict{Symbol, Float64})
         values[:V2] = V2
         values[:P2] = P2
         values[:T2] = T2
-        
-        # If heat input given, calculate state 3
-        Qin = get(values, :Qin, nothing)
-        n = get(values, :n, nothing)
-        
-        if !isnothing(Qin) && !isnothing(n)
-            # State 3: After heat addition at constant volume
-            Cv = 8.314 / (γ - 1)
-            T3 = T2 + Qin / (n * Cv)
-            P3 = P2 * T3 / T2
-            V3 = V2
-            
-            values[:T3] = T3
-            values[:P3] = P3
-            values[:V3] = V3
-            
-            # State 4: After adiabatic expansion
-            V4 = V1
-            P4 = P3 / r^γ
-            T4 = T3 / r^(γ - 1)
-            
-            values[:V4] = V4
-            values[:P4] = P4
-            values[:T4] = T4
-            
-            # Calculate work output
-            W = η * Qin
-            values[:W] = W
-        end
     end
     
     return values
 end
 
 # =============================================================================
-# DIESEL CYCLE - Diesel Engine
-# Similar to Otto but heat addition at constant pressure instead of constant volume
+# DIESEL CYCLE
 # =============================================================================
 
 struct DieselCycleSolver <: PhysicsSolver end
 
 function can_solve(::DieselCycleSolver, variables::Set{Symbol}, context::SystemContext)::Bool
-    if context.regime != CLASSICAL_MACRO
-        return false
-    end
-    
     has_cycle_marker = :diesel in variables || :diesel_cycle in variables
     has_compression_ratio = :r in variables || :compression_ratio in variables
     has_cutoff_ratio = :rc in variables || :cutoff_ratio in variables
@@ -251,11 +196,12 @@ function validate_inputs(::DieselCycleSolver, values::Dict{Symbol, Float64})::Bo
 end
 
 get_required_regime(::DieselCycleSolver) = CLASSICAL_MACRO
+get_required_substance(::DieselCycleSolver) = []  # No restriction
 get_physics_type(::DieselCycleSolver) = :classical_thermodynamics
 get_priority(::DieselCycleSolver) = 85
 
 get_description(::DieselCycleSolver) = "Diesel Cycle (Diesel engine)"
-get_equation(::DieselCycleSolver) = "η = 1 - (1/rᵞ⁻¹)[(rcᵞ - 1)/(γ(rc - 1))]"
+get_equation(::DieselCycleSolver) = "η = 1 - (1/r^(γ-1))[(rc^γ - 1)/(γ(rc - 1))]"
 get_domain(::DieselCycleSolver) = :thermodynamics
 
 function get_output_units(::DieselCycleSolver)::Dict{Symbol, String}
@@ -267,7 +213,6 @@ function solve(::DieselCycleSolver, values::Dict{Symbol, Float64})
     rc = get(values, :rc, values[:cutoff_ratio])
     γ = get(values, :gamma, get(values, :γ, 1.4))
     
-    # Diesel cycle efficiency
     η = 1.0 - (1.0 / r^(γ - 1)) * ((rc^γ - 1) / (γ * (rc - 1)))
     values[:efficiency] = η * 100
     
@@ -275,20 +220,12 @@ function solve(::DieselCycleSolver, values::Dict{Symbol, Float64})
 end
 
 # =============================================================================
-# RANKINE CYCLE - Steam Power Plant
-# Process 1-2: Pump (isentropic compression of liquid)
-# Process 2-3: Boiler (constant pressure heat addition)
-# Process 3-4: Turbine (isentropic expansion)
-# Process 4-1: Condenser (constant pressure heat rejection)
+# RANKINE CYCLE
 # =============================================================================
 
 struct RankineCycleSolver <: PhysicsSolver end
 
 function can_solve(::RankineCycleSolver, variables::Set{Symbol}, context::SystemContext)::Bool
-    if context.regime != CLASSICAL_MACRO
-        return false
-    end
-    
     has_cycle_marker = :rankine in variables || :rankine_cycle in variables
     has_pressures = :P_high in variables && :P_low in variables
     has_temps = :T_high in variables && :T_low in variables
@@ -314,6 +251,7 @@ function validate_inputs(::RankineCycleSolver, values::Dict{Symbol, Float64})::B
 end
 
 get_required_regime(::RankineCycleSolver) = CLASSICAL_MACRO
+get_required_substance(::RankineCycleSolver) = []  # No restriction
 get_physics_type(::RankineCycleSolver) = :classical_thermodynamics
 get_priority(::RankineCycleSolver) = 85
 
@@ -329,31 +267,21 @@ function solve(::RankineCycleSolver, values::Dict{Symbol, Float64})
     T_high = values[:T_high]
     T_low = values[:T_low]
     
-    # Simplified Rankine efficiency (Carnot-like approximation)
-    # Real Rankine cycle requires steam tables for accuracy
     η = 1.0 - T_low / T_high
     values[:efficiency] = η * 100
-    
-    # Note: This is simplified! Real Rankine needs enthalpy values
-    values[:note] = 0.0  # Placeholder to indicate simplification
     
     return values
 end
 
 # =============================================================================
-# GENERIC HEAT ENGINE EFFICIENCY
-# Given Qh and Qc, calculate efficiency
+# HEAT ENGINE EFFICIENCY
 # =============================================================================
 
 struct HeatEngineEfficiencySolver <: PhysicsSolver end
 
 function can_solve(::HeatEngineEfficiencySolver, variables::Set{Symbol}, context::SystemContext)::Bool
-    if context.regime != CLASSICAL_MACRO
-        return false
-    end
-    
-    has_heats = (:Qh in variables || :Q_hot in variables) && 
-                (:Qc in variables || :Q_cold in variables)
+    has_heats = (any(k in variables for k in [:Qh, :Q_hot]) && 
+                 any(k in variables for k in [:Qc, :Q_cold]))
     
     return has_heats
 end
@@ -374,6 +302,7 @@ function validate_inputs(::HeatEngineEfficiencySolver, values::Dict{Symbol, Floa
 end
 
 get_required_regime(::HeatEngineEfficiencySolver) = CLASSICAL_MACRO
+get_required_substance(::HeatEngineEfficiencySolver) = []  # No restriction
 get_physics_type(::HeatEngineEfficiencySolver) = :classical_thermodynamics
 get_priority(::HeatEngineEfficiencySolver) = 70
 
@@ -389,11 +318,9 @@ function solve(::HeatEngineEfficiencySolver, values::Dict{Symbol, Float64})
     Qh = get(values, :Qh, values[:Q_hot])
     Qc = get(values, :Qc, values[:Q_cold])
     
-    # Calculate work output
     W = Qh - Qc
     values[:W] = W
     
-    # Calculate efficiency
     η = W / Qh
     values[:efficiency] = η * 100
     
