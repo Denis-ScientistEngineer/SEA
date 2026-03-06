@@ -209,46 +209,60 @@ function infer_regime(values::Dict{Symbol, Float64})::ScaleRegime
     return CLASSICAL_MACRO
 end
 
+
 """
     infer_substance(values::Dict{Symbol, Float64}) -> SubstanceType
 
 Detect what substance we're dealing with based on variables
 """
-
 function infer_substance(values::Dict{Symbol, Float64})::SubstanceType
     # Electromagnetism variables
-    if any(k in keys(values) for k in [:Q, :E, :V, :lambda, :sigma])
-        if haskey(values, :Q)
+    em_vars = Set([:Q, :E, :V, :lambda, :sigma, :Ex, :Ey, :Ez, :Fx, :Fy, :Fz,
+                   :Q1, :Q2, :x, :y, :z, :x0, :y0, :z0, :x1, :y1, :z1, :x2, :y2, :z2])
+    if any(k in keys(values) for k in em_vars)
+        # If has charge variables, it's EM
+        if any(k in keys(values) for k in [:Q, :Q1, :Q2, :lambda, :sigma])
             return POINT_CHARGES
-        else
-            return FIELDS
         end
     end
     
-    # Gas variables (P, V, T, n) - INCLUDING PROCESS VARIABLES!
-    gas_vars = Set([:P, :p, :V, :v, :n, :T, :t, 
-                    :P1, :P2, :V1, :V2, :T1, :T2,  # ← ADD THESE!
-                    :isothermal, :adiabatic, :isobaric, :isochoric])  # ← AND THESE!
+    # Thermodynamics and Gas variables - EXPANDED!
+    thermo_vars = Set([
+        # Basic thermodynamics
+        :Q, :q, :heat, :W, :w, :work, :U, :u, :ΔU, :deltaU, :dU,
+        # Gas properties
+        :P, :p, :pressure, :V, :v, :volume, :n, :moles, :T, :t, :temperature,
+        # Process variables (states 1 and 2)
+        :P1, :P2, :V1, :V2, :T1, :T2,
+        # Process markers
+        :isothermal, :adiabatic, :isobaric, :isochoric, :polytropic,
+        # Cycle variables - ADDED!
+        :Qh, :Qc, :Q_hot, :Q_cold, :Th, :Tc, :T_hot, :T_cold,
+        :r, :compression_ratio, :rc, :cutoff_ratio,
+        :gamma, :γ,
+        # Cycle markers - ADDED!
+        :carnot, :carnot_cycle, :otto, :otto_cycle, 
+        :diesel, :diesel_cycle, :rankine, :rankine_cycle,
+        # Other thermo
+        :efficiency, :η, :Qin, :Qout,
+        :P_high, :P_low, :T_high, :T_low
+    ])
     
-    if any(k in keys(values) for k in gas_vars)
-        # Check if ideal gas regime (low P, high T)
+    if any(k in keys(values) for k in thermo_vars)
+        # Check if ideal gas regime
         P = get(values, :P, get(values, :P1, get(values, :P2, nothing)))
-        T = get(values, :T, get(values, :T1, get(values, :T2, nothing)))
+        T = get(values, :T, get(values, :T1, get(values, :T2, 
+                get(values, :Th, get(values, :Tc, nothing)))))
         
         if !isnothing(P) && !isnothing(T)
-            # Ideal gas valid if P < 10 atm and T > 100K (rough)
+            # Ideal gas valid if P < 10 atm and T > 100K
             if P < 1e6 && T > 100
                 return IDEAL_GAS
             else
                 return REAL_GAS
             end
         end
-        return IDEAL_GAS  # Default
-    end
-    
-    # Thermodynamics variables (Q, W, U)
-    if any(k in keys(values) for k in [:Q, :W, :U, :ΔU])
-        return IDEAL_GAS  # Assume gas for thermo
+        return IDEAL_GAS  # Default for thermo problems
     end
     
     return IDEAL_GAS  # Safe default
