@@ -6,9 +6,7 @@
 
 > A novel computational framework for solving multi-domain physics problems using context-aware regime detection and boundary-based solver selection.
 
-**Live Application:** [https://denis-sea.up.railway.app](https://denis-sea.up.railway.app)
-If doesn't work --- Another approach deployed on render:
-   ** Live server: ** https://sea-1-4.onrender.com
+**Live Application:** https://sea-1-4.onrender.com/
 
 ---
 
@@ -190,7 +188,7 @@ The application will start on `http://localhost:8080`
 ### Live Deployment
 
 The application is currently deployed and accessible at:  
-**https://denis-sea.up.railway.app**
+**https://sea-1-4.onrender.com/**
 
 Cloud deployment uses Railway.app with automatic deployment from this repository.
 
@@ -324,7 +322,7 @@ This project demonstrates:
 - **Backend**: Julia 1.9+ (High-performance numerical computing)
 - **Web Server**: HTTP.jl (Native Julia HTTP server)
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Deployment**: Railway.app (Cloud platform)
+- **Deployment**: render
 - **Version Control**: Git/GitHub
 
 ### Why Julia?
@@ -467,7 +465,7 @@ Applying to: Kyoto Institute of Advanced Science (KUAS)
 ### Contact Information
 - **Email**: [Your Email]
 - **GitHub**: [This Private Repository]
-- **Live Demo**: https://denis-sea.up.railway.app
+- **Live Demo**: https://sea-1-4.onrender.com/
 
 ### Project Context
 This repository is shared as part of my graduate program application to demonstrate:
@@ -489,7 +487,7 @@ This repository is shared as part of my graduate program application to demonstr
 
 For questions about this project, technical details, or my application:
 
-**Email**: [Your Email]  
+**Email**: denismuok@gmail.com  
 **Response Time**: Typically within 24 hours
 
 I'm happy to:

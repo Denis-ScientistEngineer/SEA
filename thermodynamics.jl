@@ -1,5 +1,8 @@
-# thermodynamics.jl - Context-Aware Thermodynamics Solvers
+# thermodynamics.jl - FIXED VERSION
+# Context-Aware Thermodynamics Solvers
+
 include("abstract_solver.jl")
+include("helper_functions.jl")  # ← CRITICAL: ADD THIS LINE!
 
 # =============================================================================
 # FIRST LAW OF THERMODYNAMICS: ΔU = Q - W
@@ -7,9 +10,7 @@ include("abstract_solver.jl")
 
 struct FirstLawSolver <: PhysicsSolver end
 
-# Basic compatibility
 function can_solve(::FirstLawSolver, variables::Set{Symbol}, context::SystemContext)::Bool
-    # Only valid in classical regime!
     if context.regime != CLASSICAL_MACRO
         return false
     end
@@ -23,28 +24,20 @@ function validate_inputs(::FirstLawSolver, values::Dict{Symbol, Float64})::Bool
     W = get_any(values, :W, :w, :work)
     U = get_any(values, :U, :u, :ΔU, :deltaU, :dU)
     
-    # Need EXACTLY 2 known values
     known = count(!isnothing, [Q, W, U])
-    return known == 2
+    return known >= 2
 end
 
-# Context awareness
 get_required_regime(::FirstLawSolver) = CLASSICAL_MACRO
 get_physics_type(::FirstLawSolver) = :classical_thermodynamics
 get_priority(::FirstLawSolver) = 60
 
-# Metadata
 get_description(::FirstLawSolver) = "First Law of Thermodynamics (ΔU = Q - W)"
 get_equation(::FirstLawSolver) = "ΔU = Q - W"
 get_domain(::FirstLawSolver) = :thermodynamics
 
 function get_output_units(::FirstLawSolver)::Dict{Symbol, String}
-    return Dict(
-        :Q => "J",
-        :W => "J",
-        :ΔU => "J",
-        :U => "J"
-    )
+    return Dict(:Q => "J", :W => "J", :ΔU => "J", :U => "J")
 end
 
 function get_input_constraints(::FirstLawSolver)::Dict{Symbol, String}
@@ -55,7 +48,6 @@ function get_input_constraints(::FirstLawSolver)::Dict{Symbol, String}
     )
 end
 
-# Solver implementation
 function solve(::FirstLawSolver, values::Dict{Symbol, Float64})
     Q = get_any(values, :Q, :q, :heat)
     W = get_any(values, :W, :w, :work)
@@ -76,24 +68,28 @@ function solve(::FirstLawSolver, values::Dict{Symbol, Float64})
 end
 
 # =============================================================================
-# IDEAL GAS LAW: PV = nRT
+# IDEAL GAS LAW: PV = nRT - FIXED LOGIC!
 # =============================================================================
 
 struct IdealGasSolver <: PhysicsSolver end
 
 function can_solve(::IdealGasSolver, variables::Set{Symbol}, context::SystemContext)::Bool
-    # Only valid for ideal gases in classical regime!
+    # Only valid in classical regime
     if context.regime != CLASSICAL_MACRO
         return false
     end
-    if context.substance != IDEAL_GAS && context.substance != IDEAL_GAS
-        # Allow if substance not yet determined
-        if context.substance != IDEAL_GAS
-            return false
-        end
+    
+    # FIXED: Simplified substance check - allow if IDEAL_GAS or UNKNOWN
+    # Don't reject if substance is not yet determined
+    if context.substance != IDEAL_GAS && context.substance != UNKNOWN
+        return false
     end
     
-    our_vars = Set([:P, :P1, :P2, :p, :p1, :p2,  :pressure, :V, :V1, :V2, :v1, :v2, :v, :volume, :n, :moles, :T, :T1, :T2, :t1, :t2, :t, :temperature])
+    # Check for gas law variables
+    our_vars = Set([:P, :P1, :P2, :p, :p1, :p2, :pressure, 
+                    :V, :V1, :V2, :v1, :v2, :v, :volume, 
+                    :n, :moles, 
+                    :T, :T1, :T2, :t1, :t2, :t, :temperature])
     return length(intersect(variables, our_vars)) >= 3
 end
 
@@ -103,24 +99,15 @@ function validate_inputs(::IdealGasSolver, values::Dict{Symbol, Float64})::Bool
     n = get_any(values, :n, :moles)
     T = get_any(values, :T, :T1, :T2, :t1, :t2, :t, :temperature)
     
-    # Need EXACTLY 3 known values
     known = count(!isnothing, [P, V, n, T])
     
-    # Also check validity ranges
-    if !isnothing(P) && P <= 0
-        return false
-    end
-    if !isnothing(V) && V <= 0
-        return false
-    end
-    if !isnothing(n) && n <= 0
-        return false
-    end
-    if !isnothing(T) && T <= 0
-        return false
-    end
+    # Validate positive values
+    if !isnothing(P) && P <= 0; return false; end
+    if !isnothing(V) && V <= 0; return false; end
+    if !isnothing(n) && n <= 0; return false; end
+    if !isnothing(T) && T <= 0; return false; end
     
-    return known == 3
+    return known >= 3
 end
 
 get_required_regime(::IdealGasSolver) = CLASSICAL_MACRO
@@ -133,12 +120,7 @@ get_equation(::IdealGasSolver) = "PV = nRT, R = 8.314 J/(mol·K)"
 get_domain(::IdealGasSolver) = :thermodynamics
 
 function get_output_units(::IdealGasSolver)::Dict{Symbol, String}
-    return Dict(
-        :P => "Pa",
-        :V => "m³",
-        :n => "mol",
-        :T => "K"
-    )
+    return Dict(:P => "Pa", :V => "m³", :n => "mol", :T => "K")
 end
 
 function get_input_constraints(::IdealGasSolver)::Dict{Symbol, String}
@@ -153,10 +135,10 @@ end
 function solve(::IdealGasSolver, values::Dict{Symbol, Float64})
     R = 8.314  # J/(mol·K)
     
-    P = get_any(values, :P, :p, :pressure)
-    V = get_any(values, :V, :v, :volume)
+    P = get_any(values, :P, :P1, :p, :p1, :pressure)
+    V = get_any(values, :V, :V1, :v, :v1, :volume)
     n = get_any(values, :n, :moles)
-    T = get_any(values, :T, :t, :temperature)
+    T = get_any(values, :T, :T1, :t, :t1, :temperature)
     
     if isnothing(n)
         n = (P * V) / (R * T)
@@ -186,7 +168,6 @@ function can_solve(::HeatCapacitySolver, variables::Set{Symbol}, context::System
         return false
     end
     
-    our_vars = Set([:Q, :q, :heat, :m, :mass, :c, :specific_heat, :ΔT, :deltaT, :dT])
     has_Q = any(v in variables for v in [:Q, :q, :heat])
     has_m = any(v in variables for v in [:m, :mass])
     has_c = any(v in variables for v in [:c, :specific_heat])
@@ -203,15 +184,10 @@ function validate_inputs(::HeatCapacitySolver, values::Dict{Symbol, Float64})::B
     
     known = count(!isnothing, [Q, m, c, ΔT])
     
-    # Validate positive values where required
-    if !isnothing(m) && m <= 0
-        return false
-    end
-    if !isnothing(c) && c <= 0
-        return false
-    end
+    if !isnothing(m) && m <= 0; return false; end
+    if !isnothing(c) && c <= 0; return false; end
     
-    return known == 3
+    return known >= 3
 end
 
 get_required_regime(::HeatCapacitySolver) = CLASSICAL_MACRO
@@ -223,12 +199,7 @@ get_equation(::HeatCapacitySolver) = "Q = mcΔT"
 get_domain(::HeatCapacitySolver) = :thermodynamics
 
 function get_output_units(::HeatCapacitySolver)::Dict{Symbol, String}
-    return Dict(
-        :Q => "J",
-        :m => "kg",
-        :c => "J/(kg·K)",
-        :ΔT => "K"
-    )
+    return Dict(:Q => "J", :m => "kg", :c => "J/(kg·K)", :ΔT => "K")
 end
 
 function get_input_constraints(::HeatCapacitySolver)::Dict{Symbol, String}

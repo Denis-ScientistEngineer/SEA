@@ -323,7 +323,11 @@ function get_output_units(::IsochoricProcessSolver)::Dict{Symbol, String}
 end
 
 function solve(::IsochoricProcessSolver, values::Dict{Symbol, Float64})
-    V = values[:V]
+    # FIXED: Safe access to V
+    V = get(values, :V, nothing)
+    if isnothing(V)
+        return values  # Can't solve without volume
+    end
     
     P1 = get(values, :P1, nothing)
     T1 = get(values, :T1, nothing)
@@ -351,11 +355,17 @@ function solve(::IsochoricProcessSolver, values::Dict{Symbol, Float64})
     
     # Q = nCv(T2 - T1)
     if !isnothing(n) && !isnothing(T1) && !isnothing(T2)
-        # For ideal gas: Cv = R/(γ-1), assuming γ=1.4
-        Cv = 8.314 / 0.4
+        # For ideal gas: Cv = R/(γ-1), assuming γ=1.4 for diatomic gas
+        Cv = 8.314 / 0.4  # = 20.785 J/(mol·K)
         Q = n * Cv * (T2 - T1)
         values[:Q] = Q
         values[:ΔU] = Q  # ΔU = Q - W = Q - 0 = Q
+    elseif !isnothing(P1) && !isnothing(P2) && !isnothing(V)
+        # Alternative: ΔU = (P2 - P1) * V for isochoric process
+        # This works even without knowing n
+        ΔU = (P2 - P1) * V
+        values[:ΔU] = ΔU
+        values[:Q] = ΔU  # Q = ΔU when W = 0
     end
     
     return values

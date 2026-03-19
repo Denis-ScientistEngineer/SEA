@@ -8,6 +8,7 @@ using JSON
 using Printf
 
 # Load physics files
+include("helper_functions.jl")
 include("system_context.jl")
 include("abstract_solver.jl")
 include("thermodynamics.jl")

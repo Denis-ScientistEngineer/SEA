@@ -1,5 +1,6 @@
 # electromagnetics.jl - Context-Aware Electromagnetics Solvers
 include("abstract_solver.jl")
+include("helper_functions.jl")
 
 # Constants
 const eps_0 = 8.854e-12  # F/m
