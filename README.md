@@ -7,6 +7,8 @@
 > A novel computational framework for solving multi-domain physics problems using context-aware regime detection and boundary-based solver selection.
 
 **Live Application:** [https://denis-sea.up.railway.app](https://denis-sea.up.railway.app)
+If doesn't work --- Another approach deployed on render:
+   ** Live server: ** https://sea-1-4.onrender.com
 
 ---
 
