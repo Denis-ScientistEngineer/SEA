@@ -5,9 +5,11 @@
 [![Julia](https://img.shields.io/badge/Julia-1.10-blue.svg)](https://julialang.org/)
 
 > **B-SPEC Framework**: Boundary-System-Properties-Equilibrium-Condition  
-> Developed by **Denis Muinde** for Kyoto University of Advanced Science (KUAS) Graduate Program Application
+> Developed by **Denis Muok** for Kyoto University of Advanced Science (KUAS) UnderGraduate Program Application
 
 ---
+
+Live Demo: https://sea-1-4.onrender.com
 
 ## 🎯 Project Vision
 
@@ -450,7 +452,7 @@ register_solver(MySolver())
 
 ## 📧 Contact
 
-**Developer:** Denis Muinde  
+**Developer:** Denis Muok 
 Email: denismuok@gmail.com
 **Application:** KUAS undergraduate Mechnical Engineering Program  
 **Repository:** [github.com/Denis-ScientistEngineer/SEA1.4](https://github.com/Denis-ScientistEngineer/SEA1.4)
