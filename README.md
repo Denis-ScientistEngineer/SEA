@@ -1,538 +1,479 @@
-# ⚛️ Physics Problem Solver: A Context-Aware Computational Framework
+# SEA 1.4 - B-SPEC Framework
+### Physics Solver with Four Pillars of Mechanics Integration
 
-[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://denis-sea.up.railway.app)
-[![Julia](https://img.shields.io/badge/julia-v1.9+-purple.svg)](https://julialang.org/)
-[![Status](https://img.shields.io/badge/status-active_development-blue.svg)]()
+[![Status](https://img.shields.io/badge/status-experimental-orange.svg)](https://github.com/Denis-ScientistEngineer/SEA1.4)
+[![Julia](https://img.shields.io/badge/Julia-1.10-blue.svg)](https://julialang.org/)
 
-> A novel computational framework for solving multi-domain physics problems using context-aware regime detection and boundary-based solver selection.
-
-**Live Application:** https://sea-1-4.onrender.com/
-
----
-
-## 📌 About This Repository
-
-**Repository Status:** Private (Shared for Academic Review)
-
-This repository contains my independent research project in computational physics, developed as part of my undergraduate work and included in my application to Kyoto Institute of Advanced Science (KUAS). Access is granted to:
-
-- KUAS admissions committee
-- Academic reviewers
-- Potential research supervisors
-- Professional references
-
-**Contact:** denismuok@gmail.com 
-**Application Context:** Undergraduate Program Application - KUAS  
-**Development Period:** February - March 2026
+> **B-SPEC Framework**: Boundary-System-Properties-Equilibrium-Condition  
+> Developed by **Denis Muinde** for Kyoto University of Advanced Science (KUAS) Graduate Program Application
 
 ---
 
 ## 🎯 Project Vision
 
-Traditional physics problem solvers treat each equation as an isolated calculation. This project introduces a fundamentally different approach: **treating physical systems as entities defined by their boundaries, regimes, and processes** rather than merely as collections of variables.
+SEA 1.4 represents a **fundamental rethinking** of how physics solvers should work. Instead of treating mechanics as separate domains (classical, quantum, statistical, relativistic), B-SPEC recognizes that **all mechanics unifies through four foundational pillars** based on scale and speed.
 
-This paradigm shift enables:
-- **Automatic regime detection** (Classical, Quantum, Statistical, Relativistic)
-- **Context-aware solver selection** based on physical validity
-- **Multi-domain problem solving** across thermodynamics, electromagnetics, mechanics, and optics
-- **Process-aware calculations** that understand HOW systems change, not just their states
+This is not just a physics solver - it's an **architectural framework** for understanding how physical laws emerge at different regimes.
 
 ---
 
-## 🔬 Technical Innovation
+## ✨ The Four Pillars of Mechanics
 
-### The Boundary-Based Approach
+### **The Foundation**
 
-Unlike conventional solvers that match variables to equations, this system:
+All of physics can be understood through four fundamental regimes:
 
-1. **Analyzes the physical context** of the problem
-2. **Determines applicable physics** based on scale, energy, and boundary conditions
-3. **Selects appropriate solvers** that respect physical constraints
-4. **Prevents invalid calculations** (e.g., applying classical thermodynamics at quantum scales)
-
-### Architecture Highlights
 ```
-Input Variables → Context Inference → Regime Detection → Solver Selection → Solution
-                     ↓                      ↓                    ↓
-                 System Type          Scale Analysis      Priority Ranking
-                 Boundary Type        Energy Regime       Validation
-                 Substance Type       Physical Limits     Error Handling
+┌─────────────────────────────────────────────────────────────┐
+│  CLASSICAL     │  v << c, L >> λ_dB                         │
+│  (Newton)      │  Everyday objects, macroscopic scale       │
+├─────────────────────────────────────────────────────────────┤
+│  STATISTICAL   │  N > 1000 particles                        │
+│  (Boltzmann)   │  Thermodynamics emerges from statistics    │
+├─────────────────────────────────────────────────────────────┤
+│  QUANTUM       │  L ~ λ_dB, v << c                          │
+│  (Schrödinger) │  Wave-particle duality, atomic scale       │
+├─────────────────────────────────────────────────────────────┤
+│  RELATIVISTIC  │  v ~ c, L >> λ_dB                          │
+│  (Einstein)    │  High speeds, spacetime effects            │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### Key Technical Features
-
-- **Plugin Architecture**: Modular solver system allowing domain-specific extensions
-- **Priority-Based Dispatch**: Intelligent solver ranking based on specificity and context
-- **Regime Detection**: Automatic classification using Knudsen numbers, de Broglie wavelengths, and relativistic parameters
-- **Process Modeling**: State tracking through thermodynamic processes and cycles
-- **Comprehensive Validation**: Multi-level input validation with physical constraint checking
+**Key Insight:** The regime is **automatically detected** from the input values!
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ B-SPEC Architecture
 
-### Core Components
+### **What is B-SPEC?**
+
+**B** - Boundary Conditions (Open? Closed? Isolated?)  
+**S** - System Type (Thermodynamic? Electromagnetic? Mechanical?)  
+**P** - Properties (Temperature, pressure, charge, etc.)  
+**E** - Equilibrium State (What are we solving for?)  
+**C** - Constraints (What's constant? What's changing?)
+
+### **How It Works**
+
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Web Interface (HTML/JS)               │
-│                    User Input & Visualization            │
-└────────────────────────┬────────────────────────────────┘
-                         │
-┌────────────────────────▼────────────────────────────────┐
-│              HTTP Server (Julia/HTTP.jl)                │
-│              Request Handling & API                      │
-└────────────────────────┬────────────────────────────────┘
-                         │
-┌────────────────────────▼────────────────────────────────┐
-│                 System Context Layer                     │
-│         Regime Detection | Boundary Analysis            │
-│         Scale Classification | Substance Inference      │
-└────────────────────────┬────────────────────────────────┘
-                         │
-┌────────────────────────▼────────────────────────────────┐
-│              Solver Registry & Dispatcher                │
-│         Priority Ranking | Context Matching             │
-│         Validation | Solver Selection                   │
-└────────────────────────┬────────────────────────────────┘
-                         │
-┌────────────────────────▼────────────────────────────────┐
-│                   Physics Solvers                        │
-│  ┌──────────┬──────────┬──────────┬─────────────────┐  │
-│  │  Thermo  │   E&M    │ Mechanics│  Waves/Optics   │  │
-│  │  12 Solv │  9 Solv  │  (Planned)│   (Planned)    │  │
-│  └──────────┴──────────┴──────────┴─────────────────┘  │
-└─────────────────────────────────────────────────────────┘
+Input Values
+    ↓
+Regime Detection (Automatic!)
+    ├─ β = v/c → Relativistic?
+    ├─ λ_dB/L → Quantum?
+    ├─ N > 1000 → Statistical?
+    └─ Else → Classical
+    ↓
+System Inference
+    ├─ Thermodynamic System
+    ├─ Electromagnetic System
+    └─ Mechanical System
+    ↓
+Solver Selection
+    ├─ Filter by regime compatibility
+    ├─ Check variable matching
+    └─ Return highest priority
+    ↓
+Solve & Return Result
 ```
-
-### Physics Domains Implemented
-
-#### 1. **Thermodynamics** (12 Solvers)
-   - **Basic Laws**: First Law, Ideal Gas, Heat Capacity
-   - **Processes**: Isothermal, Adiabatic, Isobaric, Isochoric, Polytropic
-   - **Cycles**: Carnot, Otto, Diesel, Rankine
-
-#### 2. **Electromagnetics** (9 Solvers)
-   - Point Charge Electric Field
-   - Coulomb Force
-   - Infinite Line Charge
-   - Infinite Plane
-   - Charged Ring (axial field)
-   - Charged Disk (axial field)
-   - Finite Line Charge (numerical integration)
-   - Parallel Plate Capacitor
-   - Electric Potential
-
-#### 3. **Mechanics** (In Development)
-   - Kinematics, Dynamics, Energy Conservation
-
-#### 4. **Waves & Optics** (Planned)
-   - Wave phenomena, Doppler effect, Snell's law
 
 ---
 
-## 📐 Scientific Foundation
+## 📊 Current Capabilities
 
-### Physical Regime Classification
+### **11 Working Solvers Across 3 Domains**
 
-The system uses scientifically rigorous criteria to classify problems:
+#### **Thermodynamics (3 solvers)**
+- First Law: `ΔU = Q - W`
+- Ideal Gas Law: `PV = nRT`
+- Heat Capacity: `Q = mcΔT`
 
-| Regime | Criteria | Physics |
-|--------|----------|---------|
-| **Classical Macroscopic** | L > 1μm, v << c, kT >> ℏω | Newton's Laws, Classical Thermo |
-| **Statistical Mesoscopic** | 0.01 < Kn < 10 | Kinetic Theory, Stat Mech |
-| **Quantum Microscopic** | λ_dB ~ L, ℏ significant | Quantum Mechanics |
-| **Relativistic** | v ≈ c, β > 0.1 | Special Relativity |
+#### **Thermodynamic Cycles (5 solvers)**
+- Heat Engine Efficiency
+- Carnot Cycle
+- Otto Cycle (gasoline engine)
+- Diesel Cycle
+- Rankine Cycle (steam turbine)
 
-**Knudsen Number**: `Kn = λ/L` (mean free path / characteristic length)  
-**de Broglie Wavelength**: `λ_dB = h/(mv)`  
-**Relativistic Parameter**: `β = v/c`
+#### **Electromagnetics (3 solvers)**
+- Point Charge Electric Field: `E = kQ/r²`
+- Coulomb Force: `F = kQ₁Q₂/r²`
+- Infinite Line Charge: `E = λ/(2πε₀r)`
 
-### Boundary Types
-
-Following classical thermodynamic system theory:
-
-- **Isolated**: No mass, no energy transfer (dE=0, dM=0)
-- **Closed**: Energy transfer, no mass (dE≠0, dM=0)
-- **Open**: Both mass and energy transfer (dE≠0, dM≠0)
-
-Boundary properties:
-- **Rigid**: Fixed volume (dV=0)
-- **Flexible**: Movable boundary (dV≠0)
-- **Permeable**: Mass can pass (dN≠0)
-- **Conducting/Insulating**: Heat transfer properties
+**All solvers are regime-aware!** They check if the problem matches their applicable physics regime.
 
 ---
 
-## 💻 Running the Application
+## 🚀 Quick Start
 
-### Prerequisites
+### **Local Setup**
 
-- Julia 1.9 or higher
-- Git (for cloning)
-
-### Local Installation
 ```bash
-# Clone this repository
-git clone [repository-url]
-cd physics-solver
+# Clone repository
+git clone https://github.com/Denis-ScientistEngineer/SEA1.4.git
+cd SEA1.4
+
+# Install Julia 1.10+
+# Download from: https://julialang.org/downloads/
 
 # Install dependencies
-julia --project=. -e 'using Pkg; Pkg.instantiate()'
+julia -e 'using Pkg; Pkg.add(["HTTP", "JSON"])'
 
-# Run the server
+# Run server
 julia server.jl
+
+# Open browser
+http://localhost:8080
 ```
 
-The application will start on `http://localhost:8080`
+### **Example Problems**
 
-### Live Deployment
-
-The application is currently deployed and accessible at:  
-**https://sea-1-4.onrender.com/**
-
-Cloud deployment uses Railway.app with automatic deployment from this repository.
-
----
-
-## 🎮 Usage Examples
-
-### Example 1: Basic Thermodynamics
 ```
-Input: Q=100, W=40
-Output: ΔU = 60 J
-Solver: First Law of Thermodynamics (ΔU = Q - W)
-Regime: Classical Macroscopic
-```
+# First Law of Thermodynamics
+Q=1000, W=300
+→ Regime: CLASSICAL
+→ System: Thermodynamic
+→ Result: ΔU = 700 J
 
-### Example 2: Ideal Gas Law
-```
-Input: P=101325, V=0.5, T=300
-Output: n = 20.3 mol
-Solver: Ideal Gas Law (PV = nRT)
-Context: IDEAL_GAS substance detected
-```
+# Ideal Gas Law
+P=101325, V=0.0224, T=273
+→ Regime: CLASSICAL → STATISTICAL (many particles)
+→ Result: n = 1.0 mol
 
-### Example 3: Electromagnetics with Scientific Notation
-```
-Input: Q=1e-6, x=1, y=0, z=0, x0=0, y0=0, z0=0
-Output: E_magnitude = 8.99e+03 N/C
-Solver: Point Charge Electric Field
-Regime: Classical Macroscopic
-Substance: POINT_CHARGES detected
-```
+# Point Charge Electric Field
+Q=1e-6, x=1, y=0, z=0, x0=0, y0=0, z0=0
+→ Regime: CLASSICAL
+→ System: Electromagnetic
+→ Result: Ex = 8990 N/C, E_magnitude = 8990 N/C
 
-### Example 4: Thermodynamic Process
-```
-Input: P1=200000, V1=1.0, V2=0.5, isothermal=1
-Output: P2 = 400000 Pa, W = -138629 J
-Solver: Isothermal Process (PV = constant)
-Process Type: Isothermal detected
-```
-
-### Example 5: Heat Engine Cycle
-```
-Input: Th=600, Tc=300, Qh=1000, carnot=1
-Output: efficiency = 50%, W = 500 J, Qc = 500 J
-Solver: Carnot Cycle (η = 1 - Tc/Th)
-Analysis: Maximum theoretical efficiency calculated
+# Carnot Cycle
+Th=600, Tc=300, Qh=1000, carnot=1
+→ Regime: STATISTICAL
+→ Result: efficiency = 50%, W = 500 J
 ```
 
 ---
 
-## 🔬 Research Contributions & Novelty
+## 🎓 The Innovation: Regime Detection
 
-### Novel Approaches
+### **Automatic Physics Regime Inference**
 
-1. **Context-Aware Computing in Physics**
-   - First implementation of regime-aware solver selection in a general-purpose physics calculator
-   - Prevents physically invalid calculations through boundary analysis
-   - Automatic scale detection from input values
+Unlike traditional solvers that require you to know which equations apply, B-SPEC **automatically detects the physics regime** from your input:
 
-2. **Unified Multi-Domain Framework**
-   - Single architecture handles multiple physics domains without domain-specific hacks
-   - Process-aware calculations that model system evolution, not just states
-   - Extensible plugin system for new domains
-
-3. **Educational Innovation**
-   - Step-by-step solution generation showing methodology
-   - Clear explanation of applicable physics and constraints
-   - Visual feedback on regime and boundary conditions
-   - Error messages with constructive suggestions
-
-### Potential Applications
-
-- **Engineering Education**: Teaching tool that explains *why* certain equations apply
-- **Rapid Prototyping**: Quick validation of engineering calculations with automatic physics checking
-- **Research Tools**: Framework for multi-physics simulations with automatic regime transitions
-- **AI Training Data**: Generate physically valid problem-solution pairs for ML models
-
-### Academic Significance
-
-This project demonstrates:
-- **Independent Research Capability**: Identified problem, designed solution, implemented system
-- **Interdisciplinary Thinking**: Bridges computational science, physics, and software engineering
-- **Practical Implementation**: Not just theory—deployed, tested, functional system
-- **Scalable Architecture**: Design allows for continuous expansion and improvement
-
----
-
-## 📊 Development Progress
-
-### Completed (Weeks 1-3) ✅
-
-**Week 1: Foundation**
-- [x] Plugin architecture design
-- [x] Abstract solver interface
-- [x] Basic thermodynamics solvers (3)
-- [x] Basic electromagnetics solvers (9)
-- [x] Cloud deployment pipeline
-
-**Week 2: Intelligence**
-- [x] Context inference system
-- [x] Regime detection algorithms
-- [x] Priority-based dispatcher
-- [x] Comprehensive validation
-- [x] Error handling with suggestions
-- [x] Step-by-step solution formatting
-- [x] Scientific notation support
-
-**Week 3: Sophistication**
-- [x] Thermodynamic process solvers (5)
-- [x] Thermodynamic cycle analyzers (4)
-- [x] Process-aware calculations
-- [x] Enhanced UI with two-column layout
-
-### In Development 🚧
-- [ ] Mechanics domain (kinematics, dynamics, energy)
-- [ ] Waves and optics solvers
-- [ ] Multi-step problem decomposition
-- [ ] P-V diagram visualization
-
-### Future Roadmap 🔮
-- [ ] State tracking through multi-process sequences
-- [ ] Real-time collaboration features
-- [ ] LaTeX equation rendering
-- [ ] Advanced visualization (3D field plots)
-- [ ] Integration with symbolic math engines
-
----
-
-## 🏛️ Technical Stack
-
-- **Backend**: Julia 1.9+ (High-performance numerical computing)
-- **Web Server**: HTTP.jl (Native Julia HTTP server)
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Deployment**: render
-- **Version Control**: Git/GitHub
-
-### Why Julia?
-
-Julia was chosen for its:
-- **Performance**: Near-C speed for numerical computations
-- **Multiple Dispatch**: Natural fit for physics solver architecture
-- **Scientific Computing Ecosystem**: Built-in support for complex mathematics
-- **Type System**: Strong typing enables compile-time optimizations
-- **Readability**: Clean syntax suitable for academic review
-
----
-
-## 📚 Code Structure & Documentation
-
-### File Structure
-```
-physics-solver/
-├── server.jl                  # HTTP server and API endpoints
-├── system_context.jl          # Regime detection and context inference
-├── abstract_solver.jl         # Base solver interface and contracts
-├── registry.jl                # Solver registration system
-├── dispatcher.jl              # Context-aware solver selection
-├── tokenizer.jl               # Input parsing (scientific notation)
-├── solution_formatter.jl      # Step-by-step solution generation
-├── thermodynamics.jl          # Thermodynamics solvers
-├── processes.jl               # Thermodynamic process solvers
-├── cycles.jl                  # Thermodynamic cycle analyzers
-├── electromagnetics.jl        # Electromagnetics solvers
-├── index.html                 # Web interface
-├── test_system.jl             # Comprehensive test suite
-├── Project.toml               # Julia dependencies
-├── nixpacks.toml              # Deployment configuration
-└── README.md                  # This file
-```
-
-### Core Abstractions
-
-#### PhysicsSolver Interface
 ```julia
-abstract type PhysicsSolver end
+function infer_regime(values::Dict{Symbol, Property})::PhysicsRegime
+    # Extract physical quantities
+    v = maximum_velocity(values)
+    L = characteristic_length(values)
+    N = particle_count(values)
+    
+    # Speed parameter
+    β = v / c  # c = speed of light
+    
+    # Quantum parameter  
+    λ_dB = ℏ / (m * v)  # de Broglie wavelength
+    quantum_param = λ_dB / L
+    
+    # Decision tree
+    if quantum_param > 0.1 && β > 0.1
+        return QUANTUM_FIELD  # QED, particle physics
+    elseif β > 0.1
+        return RELATIVISTIC   # Special/general relativity
+    elseif quantum_param > 0.1
+        return QUANTUM        # Schrödinger equation
+    elseif N > 1000
+        return STATISTICAL    # Thermodynamics
+    else
+        return CLASSICAL      # Newton's laws
+    end
+end
+```
 
-# Required methods
-can_solve(solver, variables, context)::Bool
-solve(solver, values)::Dict{Symbol, Float64}
-get_domain(solver)::Symbol
+**This is groundbreaking** because it mirrors how physics actually works - the same system can be classical at one scale and quantum at another!
 
-# Optional methods (with defaults)
-get_priority(solver)::Int
-validate_inputs(solver, values)::Bool
-get_required_regime(solver)::ScaleRegime
-get_equation(solver)::String
-get_output_units(solver)::Dict{Symbol, String}
+---
+
+## 📁 File Structure
+
+```
+SEA 1.4/
+├── PhysicsTemplate.jl          # Core: Four Pillars framework
+│   ├── PhysicsRegime enum      # CLASSICAL, STATISTICAL, QUANTUM, etc.
+│   ├── infer_regime()          # Automatic regime detection
+│   └── RegimeRules             # Physics constraints per regime
+│
+├── system_definition.jl        # System types with regime awareness
+│   ├── ThermodynamicSystem
+│   ├── ElectromagneticSystem  
+│   ├── MechanicalSystem
+│   └── infer_system()          # Automatic system detection
+│
+├── solver_interface.jl         # Abstract solver interface
+│   ├── can_solve()             # Does this solver apply?
+│   ├── is_regime_compatible()  # Is regime correct?
+│   └── solve()                 # Execute calculation
+│
+├── registry.jl                 # Solver registration system
+├── dispatcher.jl               # Intelligent solver selection
+├── tokenizer.jl                # Input parsing
+│
+├── thermodynamics_solvers.jl   # 3 thermo solvers
+├── cycle_solvers.jl            # 5 cycle solvers
+├── electromagnetics_solvers.jl # 3 EM solvers
+│
+├── server.jl                   # HTTP server with regime info
+└── index.html                  # UI with Four Pillars display
 ```
 
 ---
 
-## 🧪 Testing & Validation
+## 🔬 Technical Highlights
 
-Comprehensive test suite covering:
-- **Tokenizer**: Scientific notation parsing accuracy
-- **Context Inference**: Regime detection correctness
-- **Solver Selection**: Priority and validation logic
-- **Physics Calculations**: Numerical accuracy validation
-- **Boundary Violations**: Detection of invalid physics applications
+### **1. Type-Safe Properties**
 
-Run complete test suite:
-```bash
-julia test_system.jl
+```julia
+struct Property{T}
+    value::T
+    unit::String
+    regime::PhysicsRegime
+end
+
+# Properties know their own physics context!
+temp = Property(300.0, "K", CLASSICAL)
 ```
 
-Expected output: All tests pass with regime detection and calculation validation confirmed.
+### **2. Regime-Aware Solvers**
+
+```julia
+struct IdealGasSolver <: PhysicsSolver end
+
+function get_compatible_regimes(::IdealGasSolver)
+    return [CLASSICAL, STATISTICAL]  # Valid in both regimes
+end
+
+function solve(::IdealGasSolver, values)
+    # Physics constants
+    const R = 8.314  # J/(mol·K)
+    
+    # Standard PV = nRT calculation
+    # ...
+end
+```
+
+### **3. System Inference**
+
+```julia
+function infer_system(values::Dict{Symbol, Property})
+    # Check for thermodynamic variables
+    if has_any(values, :Q, :W, :ΔU, :P, :V, :T)
+        regime = infer_regime(values)
+        return ThermodynamicSystem(regime, boundaries, process)
+    end
+    
+    # Check for electromagnetic variables
+    if has_any(values, :E, :B, :Q, :F, :charge)
+        regime = infer_regime(values)
+        return ElectromagneticSystem(regime, charge_dist)
+    end
+    
+    # Mechanical system by default
+    return MechanicalSystem(CLASSICAL)
+end
+```
 
 ---
 
-## 📈 Project Metrics
+## 🎯 For KUAS Application Reviewers
 
-- **Total Lines of Code**: ~3,200
-- **Physics Solvers**: 21 implemented, 10+ planned
-- **Test Coverage**: Comprehensive unit and integration tests
-- **Response Time**: Sub-second for all calculations
-- **Deployment Status**: Live production environment
-- **Development Time**: 3 weeks intensive development
-- **Languages**: Julia (backend), JavaScript (frontend)
+### **Why This Matters**
 
----
+**Traditional Approach:**
+- User must know which equation applies
+- Separate solvers for each domain
+- No connection between regimes
+- Manual regime selection
 
-## 🎓 Academic Context
+**B-SPEC Approach:**
+- Automatic regime detection
+- Unified framework across all physics
+- Regime transitions are natural
+- System understands physical context
 
-### Development Background
+### **Research Contribution**
 
-This project was developed independently during my undergraduate studies as a demonstration of:
-- **Research Capability**: Identifying gaps in existing tools and proposing novel solutions
-- **Technical Execution**: Full-stack development from concept to production deployment
-- **Scientific Rigor**: Proper implementation of physical principles with appropriate validation
-- **Interdisciplinary Thinking**: Combining physics, computer science, and engineering
+This framework demonstrates:
 
-### Learning Outcomes
+1. **Deep Physics Understanding**  
+   - Recognition that mechanics unifies across scales
+   - Implementation of regime boundaries
+   - Proper handling of quantum/classical transitions
 
-Through this project, I gained deep understanding of:
-- Advanced software architecture patterns
-- Computational physics methods
-- Multi-domain physics integration
-- Cloud deployment and DevOps
-- User interface design for technical applications
+2. **Software Architecture Innovation**  
+   - Extensible solver registry
+   - Type-safe property system
+   - Intelligent dispatch mechanism
 
-### Application to Graduate Studies
-
-This project demonstrates readiness for graduate-level work by showing:
-- Independent research and problem-solving
-- Ability to work at intersection of theory and practice
-- Technical skills in computational methods
-- Commitment to creating practical, usable tools
-- Foundation for future research in computational engineering
+3. **Practical Implementation**  
+   - Working code, not just theory
+   - 11 validated solvers
+   - Web-accessible interface
 
 ---
 
-## 📖 References & Theoretical Foundation
+## 📈 Roadmap
 
-### Core Physics Texts
-1. Cengel, Y. A., & Boles, M. A. (2015). *Thermodynamics: An Engineering Approach*. McGraw-Hill.
-2. Griffiths, D. J. (2017). *Introduction to Electrodynamics*. Cambridge University Press.
-3. Pathria, R. K., & Beale, P. D. (2011). *Statistical Mechanics*. Academic Press.
+### **Phase 2: Domain Expansion** (Next)
 
-### Computational Methods
-4. Press, W. H., et al. (2007). *Numerical Recipes: The Art of Scientific Computing*. Cambridge University Press.
-5. Bezanson, J., et al. (2017). "Julia: A Fresh Approach to Numerical Computing." *SIAM Review*, 59(1), 65-98.
+- **Classical Mechanics**: F=ma, projectile motion, energy conservation
+- **Waves/Optics**: Wave equation, Snell's law, interference
+- **Quantum Mechanics**: Particle in box, de Broglie, photoelectric effect
+- **Statistical Mechanics**: Boltzmann distribution, partition functions
 
-### System Design
-6. Gamma, E., et al. (1994). *Design Patterns: Elements of Reusable Object-Oriented Software*. Addison-Wesley.
+### **Phase 3: Advanced Features**
 
----
-
-## 👨‍💻 About the Developer
-
-**Denis Muinde**  
-Undergraduate Student  
-Applying to: Kyoto Institute of Advanced Science (KUAS)
-
-### Contact Information
-- **Email**: [Your Email]
-- **GitHub**: [This Private Repository]
-- **Live Demo**: https://sea-1-4.onrender.com/
-
-### Project Context
-This repository is shared as part of my graduate program application to demonstrate:
-- Technical capability in computational physics
-- Software engineering and architecture skills
-- Independent research and problem-solving ability
-- Readiness for graduate-level research
-
-### Skills Demonstrated
-- **Physics**: Multi-domain understanding (thermodynamics, E&M, mechanics)
-- **Programming**: Julia, JavaScript, system architecture
-- **Mathematics**: Numerical methods, computational algorithms
-- **Engineering**: Full-stack development, deployment, testing
-- **Research**: Problem identification, solution design, implementation
+- Multi-step problem solving
+- Regime transition visualization
+- Uncertainty quantification
+- Graph plotting capabilities
 
 ---
 
-## 💬 Questions or Feedback?
+## 🔬 Physical Constants
 
-For questions about this project, technical details, or my application:
+```julia
+# Universal constants (PhysicsTemplate.jl)
+const ℏ = 1.054571817e-34  # J·s (reduced Planck constant)
+const c = 299792458.0      # m/s (speed of light)
+const k_B = 1.380649e-23   # J/K (Boltzmann constant)
 
-**Email**: denismuok@gmail.com  
-**Response Time**: Typically within 24 hours
+# Electromagnetic constants
+const ε₀ = 8.854187817e-12 # F/m (vacuum permittivity)
+const k_e = 8.987551787e9  # N·m²/C² (Coulomb constant)
 
-I'm happy to:
-- Explain technical decisions and architecture choices
-- Discuss future development plans
-- Provide additional documentation or demonstrations
-- Answer questions about my background and qualifications
-
----
-
-## 🔒 Repository Access
-
-**Access Level**: Private  
-**Intended Audience**: Academic reviewers, admissions committee  
-**Sharing Policy**: Please do not redistribute without permission
-
-If you received access to this repository, it's because you're reviewing my application or serving as a reference. Thank you for taking the time to explore my work!
+# Thermodynamic constants  
+const R = 8.314462618      # J/(mol·K) (gas constant)
+```
 
 ---
 
-## 📅 Version History
+## 📝 Development Notes
 
-- **v3.0** (March 2026): Week 3 completion - Cycles and processes
-- **v2.0** (March 2026): Week 2 completion - Context awareness and validation
-- **v1.0** (February 2026): Week 1 completion - Core architecture and basic solvers
+### **Design Principles**
+
+1. **Physical Correctness First**  
+   - Regime boundaries are physically meaningful
+   - Equations match textbook formulations
+   - Units are always explicit
+
+2. **Extensibility**  
+   - Adding new solvers is straightforward
+   - New regimes can be added easily
+   - System types are modular
+
+3. **Type Safety**  
+   - Properties carry regime information
+   - Compile-time checks where possible
+   - Clear error messages
+
+### **Adding a New Solver**
+
+```julia
+# 1. Define the solver type
+struct MySolver <: PhysicsSolver end
+
+# 2. Specify compatible regimes
+function get_compatible_regimes(::MySolver)
+    return [CLASSICAL]
+end
+
+# 3. Implement can_solve
+function can_solve(::MySolver, values::Dict{Symbol, Property})::Bool
+    return has_required_variables(values, [:x, :y, :z])
+end
+
+# 4. Implement solve
+function solve(::MySolver, values::Dict{Symbol, Property})
+    # Your physics calculation here
+    return PhysicsState(results)
+end
+
+# 5. Register it
+register_solver(MySolver())
+```
 
 ---
 
-*"The boundary between what is known and what is discoverable is not a line, but a landscape rich with possibility. This project is my first exploration of that terrain."*
+## 🎓 Educational Value
+
+### **For Students**
+
+- See how physics regimes emerge naturally
+- Understand when different laws apply
+- Learn proper problem classification
+- Visualize regime boundaries
+
+### **For Researchers**
+
+- Framework for multi-scale physics
+- Regime transition handling
+- Extensible solver architecture
+- Type-safe property system
 
 ---
 
-**Last Updated**: March 2026  
-**Status**: Active Development  
-**Purpose**: Academic Portfolio & Graduate Application Supporting Material
+## 📊 Project Statistics
+
+- **Development Time**: 3 weeks (concurrent with production SEA)
+- **Total Solvers**: 11 (all regime-aware)
+- **Lines of Code**: ~2,000
+- **Regimes Implemented**: 5 (Classical, Statistical, Quantum, Relativistic, QFT)
+- **System Types**: 3 (Thermodynamic, Electromagnetic, Mechanical)
 
 ---
 
 ## 🙏 Acknowledgments
 
-- Julia Computing community for the excellent language and ecosystem
-- Physics education community for inspiration and pedagogical insights
-- Open source contributors whose libraries enabled this work
-- Mentors and advisors who provided guidance throughout development
+**Conceptual Foundation:**
+- Four Pillars framework inspired by scale/speed analysis of fundamental physics
+- Regime detection based on dimensional analysis
 
+**Built With:**
+- [Julia Programming Language](https://julialang.org/)
+- HTTP.jl for web serving
+- JSON.jl for data serialization
+
+**Developed For:**
+- Kyoto University of Advanced Science (KUAS) undergraduate Program Application
+- Demonstration of research thinking and software engineering skills
+
+---
+
+## 📧 Contact
+
+**Developer:** Denis Muinde  
+Email: denismuok@gmail.com
+**Application:** KUAS undergraduate Mechnical Engineering Program  
+**Repository:** [github.com/Denis-ScientistEngineer/SEA1.4](https://github.com/Denis-ScientistEngineer/SEA1.4)
+
+---
+
+## 📄 License
+
+MIT License - See LICENSE file for details
+
+---
+
+**Status:** Experimental Framework - Active Development  
+**Version:** 1.4.0-alpha  
+**Last Updated:** March 2026
+
+---
+
+## 🚀 Vision Statement
+
+*"Physics is not a collection of separate theories - it's a unified understanding that manifests differently at different scales. B-SPEC embodies this unity by automatically detecting which regime your problem lives in and applying the appropriate laws. This is how physics should be taught, and this is how physics solvers should work."*
+
+— Denis Muok, Framework Developer
 ---
 
 **Thank you for reviewing my work. I look forward to the opportunity to discuss this project and my future research interests with you.**
